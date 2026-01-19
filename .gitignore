@@ -26,3 +26,6 @@ Desktop.ini
 
 # Claude Code
 .claude/
+
+# VSCode
+.vscode/
