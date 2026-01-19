@@ -11,6 +11,9 @@ lib/.rh_version
 lib/Help/
 lib/samples/
 
+# ResourceHacker4 auto-generated files
+lib/ResourceHacker4.ini
+
 # Temporary files
 *.bin
 *.rc
