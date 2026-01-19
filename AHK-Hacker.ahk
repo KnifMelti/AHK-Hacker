@@ -1,9 +1,18 @@
 #NoEnv
 #Warn
 #SingleInstance Force
+;@Ahk2Exe-Base 1.1.37.02
+;@Ahk2Exe-Set CompanyName, KnifMelti
+;@Ahk2Exe-Set ProductName, AHK-Hacker
+;@Ahk2Exe-Set FileDescription, Context Menu Decompiler
+;@Ahk2Exe-Set FileVersion, 3.00.00
+;@Ahk2Exe-Set ProductVersion, 3.00.00
+;@Ahk2Exe-Set LegalCopyright, Copyright © 2026 KnifMelti
+;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
+;@Ahk2Exe-Set InternalName, AHK-Hacker
+;@Ahk2Exe-SetMainIcon RH.ico
 
 ; ====================================================================
-; AHK-Hacker v2.97.00C
 ; Context Menu Decompiler
 ; ====================================================================
 ; This script decompiles AutoHotkey compiled executables (.exe)
