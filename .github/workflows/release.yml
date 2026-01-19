@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout code
@@ -35,8 +35,9 @@ jobs:
           cp lib/ResourceHacker4.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
 
       - name: Create release archive
+        shell: powershell
         run: |
-          zip -r AHK-Hacker-v${{ steps.version.outputs.VERSION }}.zip AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          Compress-Archive -Path "AHK-Hacker-v${{ steps.version.outputs.VERSION }}" -DestinationPath "AHK-Hacker-v${{ steps.version.outputs.VERSION }}.zip"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -45,11 +46,11 @@ jobs:
           body: |
             AutoHotkey decompiler with Windows context menu integration.
 
-            **Quick Start:**
-            1. Download and unblock the zip file
-            2. Extract folder and run `Install.ps1` (PowerShell) or `Install-ContextMenu.ahk`
+            **Installation:**
+            1. Download and extract the zip file
+            2. Right-click `Install.ps1` → "Run with PowerShell"
 
-            See [README.md](README.md) for full instructions.
+            See [README.md](README.md) for details.
           files: |
             AHK-Hacker-v${{ steps.version.outputs.VERSION }}.zip
           draft: false

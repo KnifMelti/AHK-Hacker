@@ -20,24 +20,26 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 
 > **Note:** AutoHotkey v1.1+ must be installed to run the helper scripts (.ahk files). Download from https://www.autohotkey.com
 
-### Quick Install
+### Recommended: PowerShell Install
 
 1. Download the latest release zip from [Releases](https://github.com/KnifMelti/AHK-Hacker/releases)
-2. **Important:** Right-click the zip file → Properties → Check **"Unblock"** → OK
-3. Open the zip and drag the folder to your desired location
-4. Double-click `Install-ContextMenu.ahk`
-5. Run `Update-ResourceHacker.ahk` to get the latest ResourceHacker 5.x
+2. Extract the zip file anywhere you like
+3. Right-click `Install.ps1` → **"Run with PowerShell"**
+
+This will automatically:
+- Unblock all files (removes Windows security warnings)
+- Download the latest ResourceHacker 5.x
+- Install the context menu integration
 
 **Done!** No administrator privileges required.
 
-### Alternative: PowerShell Install (Recommended)
+### Manual Install
 
-After extracting the zip (even if files are blocked):
-1. Right-click `Install.ps1` → **"Run with PowerShell"**
-2. This will automatically:
-   - Unblock all files
-   - Update ResourceHacker to the latest version
-   - Install the context menu
+If you prefer to install manually:
+1. Extract the zip file
+2. Unblock files if needed (right-click files → Properties → Unblock)
+3. Run `Update-ResourceHacker.ahk` to download ResourceHacker 5.x
+4. Run `Install-ContextMenu.ahk` to add the context menu
 
 ---
 
@@ -128,11 +130,9 @@ The context menu entry will be removed immediately.
 2. Restart Windows Explorer (Task Manager → Restart "Windows Explorer")
 3. Check Registry: `HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHKHacker`
 
-### Files are blocked after extraction
+### Files are blocked / Security warnings
 
-**Solution:** Windows marks files downloaded from the internet as blocked. To fix:
-1. **Before extracting:** Right-click the zip → Properties → Unblock → OK, then extract
-2. **After extracting:** Run `Install.ps1` with PowerShell to unblock all files automatically
+**Solution:** Run `Install.ps1` with PowerShell - it automatically unblocks all files.
 
 ---
 
