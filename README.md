@@ -79,8 +79,8 @@ AHK-Hacker\
     ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
     ├── ResourceHacker4.exe   (Bundled legacy version - v4.x)
     ├── .rh_version           (Version cache)
-    ├── help                  (ResourceHacker documentation)
-    └── samples\              (ResourceHacker samples)
+    ├── help                  (Resource Hacker documentation)
+    └── samples\              (Resource Hacker samples)
 ```
 
 ---
@@ -142,7 +142,7 @@ HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHKHacker
 ### Supported AutoHotkey Versions
 
 Works with compiled scripts from:
-- AutoHotkey v1.0.x (uses ResourceHacker 4.x fallback)
+- AutoHotkey v1.0.x (uses Resource Hacker 4.x fallback)
 - AutoHotkey v1.1.x
 - AutoHotkey v2.x
 
@@ -151,4 +151,4 @@ Works with compiled scripts from:
 ## Credits
 
 - **AHK-Hacker** based on [AutoHotkey Decompiler v2.97.00C by Jake (A-gent)](https://github.com/A-gent/AutoHotkey-Decompiler)
-- **ResourceHacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
+- **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
