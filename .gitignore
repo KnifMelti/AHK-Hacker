@@ -1,0 +1,25 @@
+# Logs
+log/*.log
+
+# ResourceHacker (downloaded by Update-ResourceHacker.ahk)
+lib/ResourceHacker.exe
+lib/ResourceHacker.ini
+lib/ResourceHacker.def
+lib/ReadMe.txt
+lib/changes.txt
+lib/.rh_version
+lib/Help/
+lib/samples/
+
+# Temporary files
+*.bin
+*.rc
+*.res
+resource_hacker_temp.zip
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Claude Code
+.claude/
