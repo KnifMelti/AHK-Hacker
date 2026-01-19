@@ -23,44 +23,33 @@ jobs:
 
       - name: Prepare release files
         run: |
-          mkdir -p AHK-Hacker-release/lib
-          cp AHK-Hacker.ahk AHK-Hacker-release/
-          cp AHK-Hacker.exe AHK-Hacker-release/
-          cp Install-ContextMenu.ahk AHK-Hacker-release/
-          cp Uninstall-ContextMenu.ahk AHK-Hacker-release/
-          cp Update-ResourceHacker.ahk AHK-Hacker-release/
-          cp RH.ico AHK-Hacker-release/
-          cp README.md AHK-Hacker-release/
-          cp lib/ResourceHacker4.exe AHK-Hacker-release/lib/
+          mkdir -p AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib
+          cp AHK-Hacker.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp AHK-Hacker.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp Install-ContextMenu.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp Uninstall-ContextMenu.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp Update-ResourceHacker.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp Install.ps1 AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp RH.ico AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp README.md AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp lib/ResourceHacker4.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
 
       - name: Create release archive
         run: |
-          cd AHK-Hacker-release
-          zip -r ../AHK-Hacker-v${{ steps.version.outputs.VERSION }}.zip .
+          zip -r AHK-Hacker-v${{ steps.version.outputs.VERSION }}.zip AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           name: Release v${{ steps.version.outputs.VERSION }}
           body: |
-            ## AHK-Hacker v${{ steps.version.outputs.VERSION }}
+            AutoHotkey decompiler with Windows context menu integration.
 
-            ### Installation
-            1. Download and extract `AHK-Hacker-v${{ steps.version.outputs.VERSION }}.zip`
-            2. Run `Install-ContextMenu.ahk` to enable right-click menu integration
-            3. (Optional) Run `Update-ResourceHacker.ahk` to download ResourceHacker 5.x
+            **Quick Start:**
+            1. Download and unblock the zip file
+            2. Extract folder and run `Install.ps1` (PowerShell) or `Install-ContextMenu.ahk`
 
-            ### What's Included
-            - **AHK-Hacker.exe** / **AHK-Hacker.ahk** - Main decompiler (signed executable + source)
-            - **Install-ContextMenu.ahk** - Context menu installer
-            - **Uninstall-ContextMenu.ahk** - Context menu remover
-            - **Update-ResourceHacker.ahk** - ResourceHacker 5.x updater
-            - **lib/ResourceHacker4.exe** - Bundled legacy version for older AHK formats
-            - **RH.ico** - Application icon
-            - **README.md** - Documentation
-
-            ### What's Changed
-            See commit history below.
+            See [README.md](README.md) for full instructions.
           files: |
             AHK-Hacker-v${{ steps.version.outputs.VERSION }}.zip
           draft: false

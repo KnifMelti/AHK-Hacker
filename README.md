@@ -20,18 +20,24 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 
 > **Note:** AutoHotkey v1.1+ must be installed to run the helper scripts (.ahk files). Download from https://www.autohotkey.com
 
-### Step 1: Download Resource Hacker
+### Quick Install
 
-1. Run `Update-ResourceHacker.ahk`
-2. Wait for download and extraction to complete
-3. ResourceHacker.exe will be placed in the `lib\` folder
-
-### Step 2: Install Context Menu
-
-1. Double-click `Install-ContextMenu.ahk`
-2. Click **OK** on the success message
+1. Download the latest release zip from [Releases](https://github.com/KnifMelti/AHK-Hacker/releases)
+2. **Important:** Right-click the zip file → Properties → Check **"Unblock"** → OK
+3. Open the zip and drag the folder to your desired location
+4. Double-click `Install-ContextMenu.ahk`
+5. Run `Update-ResourceHacker.ahk` to get the latest ResourceHacker 5.x
 
 **Done!** No administrator privileges required.
+
+### Alternative: PowerShell Install (Recommended)
+
+After extracting the zip (even if files are blocked):
+1. Right-click `Install.ps1` → **"Run with PowerShell"**
+2. This will automatically:
+   - Unblock all files
+   - Update ResourceHacker to the latest version
+   - Install the context menu
 
 ---
 
@@ -72,6 +78,7 @@ AHK-Hacker\
 ├── Install-ContextMenu.ahk   (Installs right-click menu)
 ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
 ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
+├── Install.ps1               (PowerShell installer - unblocks files)
 ├── RH.ico                    (Resource Hacker icon)
 ├── README.md                 (You're reading it...)
 ├── log\                      (Decompilation logs)
@@ -120,6 +127,12 @@ The context menu entry will be removed immediately.
 1. Run `Install-ContextMenu.ahk` again
 2. Restart Windows Explorer (Task Manager → Restart "Windows Explorer")
 3. Check Registry: `HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHKHacker`
+
+### Files are blocked after extraction
+
+**Solution:** Windows marks files downloaded from the internet as blocked. To fix:
+1. **Before extracting:** Right-click the zip → Properties → Unblock → OK, then extract
+2. **After extracting:** Run `Install.ps1` with PowerShell to unblock all files automatically
 
 ---
 
