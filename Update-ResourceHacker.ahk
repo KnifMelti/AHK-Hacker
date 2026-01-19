@@ -1,5 +1,4 @@
-#NoEnv
-#Warn
+#Requires AutoHotkey v2.0
 #SingleInstance Force
 
 ; ====================================================================
@@ -21,8 +20,8 @@ global ResourceHackerExe := LibraryDir . "\ResourceHacker.exe"
 global SilentMode := false
 
 ; Check for silent mode parameter
-Loop, %0% {
-    param := %A_Index%
+Loop A_Args.Length {
+    param := A_Args[A_Index]
     if (param = "/silent" || param = "-silent") {
         SilentMode := true
         break
@@ -36,25 +35,25 @@ return
 Main() {
     ; Show progress
     ShowNotification("Checking for Resource Hacker updates...", 3, 1)
-    Sleep, 500
+    Sleep(500)
 
     ; Ensure library directory exists
     if (!FileExist(LibraryDir)) {
-        FileCreateDir, %LibraryDir%
+        DirCreate(LibraryDir)
     }
 
     ; Get current server version info (Last-Modified header)
     serverVersion := GetServerVersion()
     if (serverVersion = "ERROR") {
         ShowNotification("Failed to check for updates.`nCheck your internet connection.", 5, 3, "Error")
-        Sleep, 3000
-        ExitApp, 1
+        Sleep(3000)
+        ExitApp(1)
     }
 
     ; Read saved version info
     savedVersion := ""
     if (FileExist(VersionFile)) {
-        FileRead, savedVersion, %VersionFile%
+        savedVersion := FileRead(VersionFile)
         savedVersion := Trim(savedVersion)
     }
 
@@ -76,32 +75,34 @@ Main() {
 
     if (!needsUpdate) {
         ShowNotification("Resource Hacker is already up to date.", 5, 1)
-        Sleep, 3000
-        ExitApp, 0
+        Sleep(3000)
+        ExitApp(0)
     }
 
-    Sleep, 1000
+    Sleep(1000)
 
     ; Download and install
    if (DownloadAndInstall()) {
         ; Save version info
-        FileDelete, %VersionFile%
-        FileAppend, %serverVersion%, %VersionFile%
+        if (FileExist(VersionFile)) {
+            FileDelete(VersionFile)
+        }
+        FileAppend(serverVersion, VersionFile)
 
         ShowNotification("Resource Hacker updated successfully!", 5, 1)
-        Sleep, 3000
-        ExitApp, 0
+        Sleep(3000)
+        ExitApp(0)
     } else {
         ShowNotification("Failed to update Resource Hacker.", 5, 3, "Error")
-        Sleep, 3000
-        ExitApp, 1
+        Sleep(3000)
+        ExitApp(1)
     }
 }
 
 GetServerVersion() {
     ; Use WinHTTP COM object to send HEAD request
     try {
-        whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+        whr := ComObject("WinHttp.WinHttpRequest.5.1")
         whr.Open("HEAD", RH_URL, false)
         whr.Send()
 
@@ -128,7 +129,7 @@ GetServerVersion() {
 
         ; If we got here but request succeeded, use current date
         return A_Now
-    } catch e {
+    } catch Error as e {
         return "ERROR"
     }
 }
@@ -136,42 +137,46 @@ GetServerVersion() {
 DownloadAndInstall() {
     ; Delete old temp file if exists
     if (FileExist(TempZipFile)) {
-        FileDelete, %TempZipFile%
+        FileDelete(TempZipFile)
     }
 
-    ; Download ZIP file using UrlDownloadToFile
-    UrlDownloadToFile, %RH_URL%, %TempZipFile%
-    if (ErrorLevel || !FileExist(TempZipFile)) {
+    ; Download ZIP file using Download function
+    try {
+        Download(RH_URL, TempZipFile)
+        if (!FileExist(TempZipFile)) {
+            return false
+        }
+    } catch Error as err {
         return false
     }
 
     ; Check file size (should be > 1MB for valid ZIP)
-    FileGetSize, zipSize, %TempZipFile%
+    zipSize := FileGetSize(TempZipFile)
     if (zipSize < 1000000) {
-        FileDelete, %TempZipFile%
+        FileDelete(TempZipFile)
         return false
     }
 
     ; Extract ZIP using PowerShell
-    psCmd := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ""Expand-Archive -Path '" . TempZipFile . "' -DestinationPath '" . LibraryDir . "' -Force"""
-    RunWait, %psCmd%, , Hide
+    psCmd := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command `"Expand-Archive -Path '" . TempZipFile . "' -DestinationPath '" . LibraryDir . "' -Force`""
+    RunWait(psCmd, , "Hide")
 
     ; Wait for extraction to complete
-    Sleep, 500
+    Sleep(500)
 
     ; Unblock all extracted files (remove "downloaded from internet" flag)
-    psUnblock := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ""Get-ChildItem -Path '" . LibraryDir . "' -Recurse | Unblock-File"""
-    RunWait, %psUnblock%, , Hide
+    psUnblock := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command `"Get-ChildItem -Path '" . LibraryDir . "' -Recurse | Unblock-File`""
+    RunWait(psUnblock, , "Hide")
 
     ; Verify extraction
     if (!FileExist(ResourceHackerExe)) {
         ; Clean up temp file
-        FileDelete, %TempZipFile%
+        FileDelete(TempZipFile)
         return false
     }
 
     ; Clean up temp file
-    FileDelete, %TempZipFile%
+    FileDelete(TempZipFile)
 
     return true
 }
@@ -179,8 +184,8 @@ DownloadAndInstall() {
 ShowNotification(message, timeout := 3, icon := 1, title := "AHK-Hacker") {
     if (!SilentMode) {
         if (title = "Error")
-            TrayTip, AHK-Hacker Error, %message%, %timeout%, %icon%
+            TrayTip(message, "AHK-Hacker Error", icon)
         else
-            TrayTip, %title%, %message%, %timeout%, %icon%
+            TrayTip(message, title, icon)
     }
 }

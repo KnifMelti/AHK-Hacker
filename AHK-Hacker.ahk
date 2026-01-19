@@ -1,11 +1,10 @@
-#NoEnv
-#Warn
+#Requires AutoHotkey v2.0
 #SingleInstance Force
-;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v1.1.37.02\Unicode 64-bit.bin
+;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.0.0.1
+;@Ahk2Exe-Set FileVersion, 3.0.0.0
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -21,15 +20,15 @@
 ; ====================================================================
 
 ; Get path from context menu (Windows sends "%1" as parameter)
-if (A_Args.Length() = 0) {
-    MsgBox, 16, Error, No file specified!`n`nUsage: Drag .exe file or use from context menu.
-    ExitApp, 1
+if (A_Args.Length = 0) {
+    MsgBox("No file specified!`n`nUsage: Drag .exe file or use from context menu.", "Error", 16)
+    ExitApp(1)
 }
 
 exePath := A_Args[1]
 
 ; Set working directory to script folder
-SetWorkingDir, %A_ScriptDir%
+SetWorkingDir(A_ScriptDir)
 
 ; ====================================================================
 ; STEP 1: VALIDATION
@@ -37,15 +36,15 @@ SetWorkingDir, %A_ScriptDir%
 
 ; Validate input file exists
 if (!FileExist(exePath)) {
-    TrayTip, AHK-Hacker Error, File not found: %exePath%, 5, 3
-    ExitApp, 1
+    TrayTip("File not found: " . exePath, "AHK-Hacker Error", 3)
+    ExitApp(1)
 }
 
 ; Check that it's an .exe file
-SplitPath, exePath, fileName, fileDir, fileExt
+SplitPath(exePath, &fileName, &fileDir, &fileExt)
 if (fileExt != "exe") {
-    TrayTip, AHK-Hacker Error, Not an executable file!, 5, 3
-    ExitApp, 1
+    TrayTip("Not an executable file!", "AHK-Hacker Error", 3)
+    ExitApp(1)
 }
 
 ; ====================================================================
@@ -53,7 +52,7 @@ if (fileExt != "exe") {
 ; ====================================================================
 
 ; Extract filename without extension
-SplitPath, fileName, , , , fileBaseName
+SplitPath(fileName, , , , &fileBaseName)
 
 ; Generate output name
 outputName := fileBaseName . "_decompiled"
@@ -65,13 +64,14 @@ logFile := "log\" . fileBaseName . "_decompile_" . timestamp . ".log"
 
 ; Ensure log directory exists
 if (!FileExist("log")) {
-    FileCreateDir, log
+    DirCreate("log")
 }
 
 ; Clean up old temporary files
-FileDelete, RCData.rc
-FileDelete, RCData.bin
-FileDelete, RCDATA*.bin
+try FileDelete("RCData.rc")
+try FileDelete("RCData.bin")
+Loop Files "RCDATA*.bin"
+    try FileDelete(A_LoopFileFullPath)
 
 ; ====================================================================
 ; STEP 3: DECOMPILATION
@@ -83,33 +83,33 @@ resourceHacker4Path := A_ScriptDir . "\lib\ResourceHacker4.exe"
 
 ; Check that at least one ResourceHacker exists
 if (!FileExist(resourceHackerPath) && !FileExist(resourceHacker4Path)) {
-    TrayTip, AHK-Hacker Error, ResourceHacker.exe not found in lib folder!`n`nRun Update-ResourceHacker.ahk to download it., 5, 3
-    ExitApp, 1
+    TrayTip("ResourceHacker.exe not found in lib folder!`n`nRun Update-ResourceHacker.ahk to download it.", "AHK-Hacker Error", 3)
+    ExitApp(1)
 }
 
 ; Try ResourceHacker 5.x first (if available)
 binFound := false
 if (FileExist(resourceHackerPath)) {
-    cmd := """" . resourceHackerPath . """ -open """ . exePath . """ -save RCData.rc -action extract -mask RCDATA,, -log """ . logFile . """"
-    RunWait, %cmd%, , Hide
-    Sleep, 100
+    cmd := '"' . resourceHackerPath . '" -open "' . exePath . '" -save RCData.rc -action extract -mask RCDATA,, -log "' . logFile . '"'
+    RunWait(cmd, , "Hide")
+    Sleep(100)
 
     ; Convert log file from UTF-16 LE to UTF-8
     if (FileExist(logFile)) {
-        fileObj := FileOpen(logFile, "r", "UTF-16")
-        if (IsObject(fileObj)) {
+        try {
+            fileObj := FileOpen(logFile, "r", "UTF-16")
             logContent := fileObj.Read()
             fileObj.Close()
             if (logContent != "") {
-                FileDelete, %logFile%
-                FileAppend, %logContent%, %logFile%, UTF-8-RAW
+                FileDelete(logFile)
+                FileAppend(logContent, logFile, "UTF-8-RAW")
                 logContent := ""
             }
         }
     }
 
     ; Check if any .bin files were extracted
-    Loop, Files, RCDATA*.bin
+    Loop Files "RCDATA*.bin"
     {
         binFound := true
         break
@@ -120,27 +120,27 @@ if (FileExist(resourceHackerPath)) {
 
 ; If ResourceHacker 5.x failed, try ResourceHacker 4.x (handles older AHK formats)
 if (!binFound && FileExist(resourceHacker4Path)) {
-    FileDelete, RCData.rc
-    cmd := """" . resourceHacker4Path . """ -open """ . exePath . """ -save RCData.rc -action extract -mask RCDATA,, -log """ . logFile . """"
-    RunWait, %cmd%, , Hide
-    Sleep, 100
+    try FileDelete("RCData.rc")
+    cmd := '"' . resourceHacker4Path . '" -open "' . exePath . '" -save RCData.rc -action extract -mask RCDATA,, -log "' . logFile . '"'
+    RunWait(cmd, , "Hide")
+    Sleep(100)
 
     ; Convert log file from UTF-16 LE to UTF-8
     if (FileExist(logFile)) {
-        fileObj := FileOpen(logFile, "r", "UTF-16")
-        if (IsObject(fileObj)) {
+        try {
+            fileObj := FileOpen(logFile, "r", "UTF-16")
             logContent := fileObj.Read()
             fileObj.Close()
             if (logContent != "") {
-                FileDelete, %logFile%
-                FileAppend, %logContent%, %logFile%, UTF-8-RAW
+                FileDelete(logFile)
+                FileAppend(logContent, logFile, "UTF-8-RAW")
                 logContent := ""
             }
         }
     }
 
     ; Check again for .bin files
-    Loop, Files, RCDATA*.bin
+    Loop Files "RCDATA*.bin"
     {
         binFound := true
         break
@@ -151,9 +151,9 @@ if (!binFound && FileExist(resourceHacker4Path)) {
 
 ; Check that extraction succeeded
 if (!binFound) {
-    TrayTip, AHK-Hacker Error, Not an AutoHotkey executable or packed/protected: %fileName%, 5, 3
-    FileDelete, RCData.rc
-    ExitApp, 1
+    TrayTip("Not an AutoHotkey executable or packed/protected: " . fileName, "AHK-Hacker Error", 3)
+    try FileDelete("RCData.rc")
+    ExitApp(1)
 }
 
 ; ====================================================================
@@ -161,10 +161,10 @@ if (!binFound) {
 ; ====================================================================
 
 ; Delete RCData.rc (we only need .bin)
-FileDelete, RCData.rc
+try FileDelete("RCData.rc")
 
 ; Wait a bit to ensure .bin file has been created
-Sleep, 100
+Sleep(100)
 
 ; Find the extracted .bin file (new ResourceHacker uses RCDATA1_1.bin format, old used RCData.bin)
 binFile := ""
@@ -172,7 +172,7 @@ if (FileExist("RCData.bin")) {
     binFile := "RCData.bin"
 } else {
     ; Look for new naming pattern: RCDATA1_1.bin, RCDATA1_2.bin, etc.
-    Loop, Files, RCDATA*.bin
+    Loop Files "RCDATA*.bin"
     {
         binFile := A_LoopFileName
         break  ; Use the first one found
@@ -181,16 +181,17 @@ if (FileExist("RCData.bin")) {
 
 ; Check that a .bin file was found
 if (binFile = "") {
-    TrayTip, AHK-Hacker Error, Failed to extract script data!`n`nThis file may not be an AutoHotkey executable., 5, 3
-    ExitApp, 1
+    TrayTip("Failed to extract script data!`n`nThis file may not be an AutoHotkey executable.", "AHK-Hacker Error", 3)
+    ExitApp(1)
 }
 
 ; Read the binary data and convert line endings to Windows CRLF
-FileRead, scriptContent, %binFile%
-if (ErrorLevel) {
-    TrayTip, AHK-Hacker Error, Failed to read script data!, 5, 3
-    FileDelete, %binFile%
-    ExitApp, 1
+try {
+    scriptContent := FileRead(binFile)
+} catch Error as err {
+    TrayTip("Failed to read script data!", "AHK-Hacker Error", 3)
+    try FileDelete(binFile)
+    ExitApp(1)
 }
 
 ; Convert Unix LF to Windows CRLF
@@ -198,12 +199,13 @@ scriptContent := StrReplace(scriptContent, "`r`n", "`n")  ; Normalize to LF firs
 scriptContent := StrReplace(scriptContent, "`n", "`r`n")  ; Convert to CRLF
 
 ; Write to output file with Windows line endings
-FileDelete, %outputPath%
-FileAppend, %scriptContent%, %outputPath%
-if (ErrorLevel) {
-    TrayTip, AHK-Hacker Error, Failed to create output file: %outputPath%, 5, 3
-    FileDelete, %binFile%
-    ExitApp, 1
+try FileDelete(outputPath)
+try {
+    FileAppend(scriptContent, outputPath)
+} catch Error as err {
+    TrayTip("Failed to create output file: " . outputPath, "AHK-Hacker Error", 3)
+    try FileDelete(binFile)
+    ExitApp(1)
 }
 
 ; Clear variable to free memory before deleting file
@@ -214,23 +216,23 @@ scriptContent := ""
 ; ====================================================================
 
 ; Cleanup: Remove temporary files
-FileDelete, RCData.rc
-Sleep, 50
-FileDelete, %binFile%
+try FileDelete("RCData.rc")
+Sleep(50)
+try FileDelete(binFile)
 
 ; Remove any remaining .rc and .bin files (from ResourceHacker)
-Loop, Files, *.rc
-    FileDelete, %A_LoopFileFullPath%
-Loop, Files, RCDATA*.bin
-    FileDelete, %A_LoopFileFullPath%
+Loop Files "*.rc"
+    try FileDelete(A_LoopFileFullPath)
+Loop Files "RCDATA*.bin"
+    try FileDelete(A_LoopFileFullPath)
 
 ; ====================================================================
 ; STEP 6: SUCCESS NOTIFICATION
 ; ====================================================================
 
 ; Show success message
-TrayTip, AHK-Hacker Decompiled, %outputName%.ahk, 5, 1
+TrayTip(outputName . ".ahk", "AHK-Hacker Decompiled", 1)
 
 ; Wait a bit so the notification has time to show
-Sleep, 2000
-ExitApp, 0
+Sleep(2000)
+ExitApp(0)

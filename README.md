@@ -18,7 +18,7 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 
 ## Installation
 
-> **Note:** AutoHotkey v1.1+ must be installed to run the helper scripts (.ahk files). Download from https://www.autohotkey.com
+> **Note:** AutoHotkey v2.0+ must be installed to run the helper scripts (.ahk files). Download from https://www.autohotkey.com
 
 ### Recommended: PowerShell Install
 
@@ -139,7 +139,7 @@ The context menu entry will be removed immediately.
 ## Requirements
 
 - **Windows**: 10 or later
-- **AutoHotkey**: v1.1+ (for running helper scripts: Install/Uninstall-ContextMenu, Update-ResourceHacker)
+- **AutoHotkey**: v2.0+ (for running helper scripts: Install/Uninstall-ContextMenu, Update-ResourceHacker)
 - **Internet**: Required for Resource Hacker updates
 
 ---

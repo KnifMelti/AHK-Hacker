@@ -8,28 +8,30 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 
 ## Tech Stack
 
-- **Language**: AutoHotkey v1.1
+- **Language**: AutoHotkey v2.0
 - **External Tool**: ResourceHacker (downloaded automatically)
 - **Platform**: Windows 10+
 
 ## File Structure
 
 ```
-AHK-Hacker/
-├── AHK-Hacker.ahk           # Main decompiler script
-├── AHK-Hacker.exe           # Compiled and signed executable
-├── Install-ContextMenu.ahk  # Registers right-click menu in registry
-├── Uninstall-ContextMenu.ahk# Removes right-click menu
-├── Update-ResourceHacker.ahk# Downloads/updates ResourceHacker
-├── Icon.ico                 # Application icon
-├── README.md                # User documentation
-├── CLAUDE.md                # This file
-├── log/                     # Decompilation logs
-└── lib/
-    ├── ResourceHacker.exe   # Downloaded by Update-ResourceHacker.ahk (v5.x)
-    ├── ResourceHacker4.exe  # Bundled legacy version (v4.x) for older AHK formats
-    ├── .rh_version          # Version cache (Last-Modified header)
-    └── Help/                # ResourceHacker documentation
+AHK-Hacker\
+├── AHK-Hacker.ahk            (Main decompiler script)
+├── AHK-Hacker.exe            (Compiled and signed executable)
+├── Install-ContextMenu.ahk   (Installs right-click menu)
+├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
+├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
+├── Install.ps1               (PowerShell installer - unblocks files)
+├── RH.ico                    (Resource Hacker icon)
+├── README.md                 (User documentation)
+├── CLAUDE.md                 (This file - developer documentation)
+├── log\                      (Decompilation logs)
+└── lib\
+    ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
+    ├── ResourceHacker4.exe   (Bundled legacy version - v4.x)
+    ├── .rh_version           (Version cache)
+    ├── help                  (Resource Hacker documentation)
+    └── samples\              (Resource Hacker samples)
 ```
 
 ## Key Components
