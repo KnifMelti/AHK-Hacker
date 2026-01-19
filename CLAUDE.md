@@ -55,7 +55,7 @@ Updater that:
 ### Install/Uninstall-ContextMenu.ahk
 Registry scripts that add/remove context menu entry at:
 ```
-HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHKHacker
+HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker
 ```
 No admin rights required.
 
@@ -80,3 +80,4 @@ The decompiler tries 5.x first, then falls back to 4.x automatically.
 - **"ResourceHacker.exe not found"**: Run `Update-ResourceHacker.ahk` (note: `ResourceHacker4.exe` is bundled and should always be present)
 - **"Failed to extract script data"**: The .exe is not an AHK executable or uses encryption
 - **Context menu missing**: Run `Install-ContextMenu.ahk`, restart Explorer if needed
+
