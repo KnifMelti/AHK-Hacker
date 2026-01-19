@@ -96,16 +96,15 @@ if (FileExist(resourceHackerPath)) {
 
     ; Convert log file from UTF-16 LE to UTF-8
     if (FileExist(logFile)) {
-        FileRead, logContent, %logFile%
-        if (!ErrorLevel && logContent != "") {
-            FileDelete, %logFile%
-            Sleep, 50
-            fileObj := FileOpen(logFile, "w", "UTF-8")
-            if (IsObject(fileObj)) {
-                fileObj.Write(logContent)
-                fileObj.Close()
+        fileObj := FileOpen(logFile, "r", "UTF-16")
+        if (IsObject(fileObj)) {
+            logContent := fileObj.Read()
+            fileObj.Close()
+            if (logContent != "") {
+                FileDelete, %logFile%
+                FileAppend, %logContent%, %logFile%, UTF-8-RAW
+                logContent := ""
             }
-            logContent := ""
         }
     }
 
@@ -128,16 +127,15 @@ if (!binFound && FileExist(resourceHacker4Path)) {
 
     ; Convert log file from UTF-16 LE to UTF-8
     if (FileExist(logFile)) {
-        FileRead, logContent, %logFile%
-        if (!ErrorLevel && logContent != "") {
-            FileDelete, %logFile%
-            Sleep, 50
-            fileObj := FileOpen(logFile, "w", "UTF-8")
-            if (IsObject(fileObj)) {
-                fileObj.Write(logContent)
-                fileObj.Close()
+        fileObj := FileOpen(logFile, "r", "UTF-16")
+        if (IsObject(fileObj)) {
+            logContent := fileObj.Read()
+            fileObj.Close()
+            if (logContent != "") {
+                FileDelete, %logFile%
+                FileAppend, %logContent%, %logFile%, UTF-8-RAW
+                logContent := ""
             }
-            logContent := ""
         }
     }
 
