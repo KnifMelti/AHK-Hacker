@@ -15,11 +15,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # Preserve line endings as stored in repository (CRLF)
+          # This ensures .gitattributes settings are respected
+          lfs: false
 
       - name: Extract version from tag
         id: version
         shell: bash
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Verify line endings (CRLF should be preserved)
+        run: |
+          echo "Verifying line endings in checked-out files..."
+          file -b AHK-Hacker.ahk Install-ContextMenu.ahk README.md
+          echo "All files should show 'CRLF line terminators'"
 
       - name: Prepare release files
         run: |
@@ -36,6 +46,8 @@ jobs:
 
       - name: Create release archive
         run: |
+          # Note: zip preserves line endings as-is from source files
+          # Files are checked out with CRLF per .gitattributes
           zip -r AHK-Hacker-v${{ steps.version.outputs.VERSION }}.zip AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
 
       - name: Create Release
