@@ -4,16 +4,15 @@
 ;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v1.1.37.02\Unicode 64-bit.bin
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
-;@Ahk2Exe-Set FileDescription, Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.00.00
-;@Ahk2Exe-Set ProductVersion, 3.00.00
-;@Ahk2Exe-Set LegalCopyright, Copyright © 2026 KnifMelti
+;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
+;@Ahk2Exe-Set FileVersion, 3.0.0.0
+;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
 ;@Ahk2Exe-SetMainIcon RH.ico
 
 ; ====================================================================
-; Context Menu Decompiler
+; AHK Context Menu Decompiler
 ; ====================================================================
 ; This script decompiles AutoHotkey compiled executables (.exe)
 ; by extracting the embedded RCDATA resource using ResourceHacker.
