@@ -9,6 +9,7 @@
 ; ResourceHacker from angusj.com using HTTP HEAD to check for updates.
 ;
 ; Usage: Run this script manually to check for Resource Hacker updates
+;        Pass /silent parameter to run without notifications
 ; ====================================================================
 
 ; Configuration
@@ -17,6 +18,16 @@ global LibraryDir := A_ScriptDir . "\lib"
 global VersionFile := LibraryDir . "\.rh_version"
 global TempZipFile := LibraryDir . "\resource_hacker_temp.zip"
 global ResourceHackerExe := LibraryDir . "\ResourceHacker.exe"
+global SilentMode := false
+
+; Check for silent mode parameter
+Loop, %0% {
+    param := %A_Index%
+    if (param = "/silent" || param = "-silent") {
+        SilentMode := true
+        break
+    }
+}
 
 ; Main execution
 Main()
@@ -24,7 +35,7 @@ return
 
 Main() {
     ; Show progress
-    TrayTip, AHK-Hacker, Checking for Resource Hacker updates..., 3, 1
+    ShowNotification("Checking for Resource Hacker updates...", 3, 1)
     Sleep, 500
 
     ; Ensure library directory exists
@@ -35,7 +46,7 @@ Main() {
     ; Get current server version info (Last-Modified header)
     serverVersion := GetServerVersion()
     if (serverVersion = "ERROR") {
-        TrayTip, AHK-Hacker Error, Failed to check for updates.`nCheck your internet connection., 5, 3
+        ShowNotification("Failed to check for updates.`nCheck your internet connection.", 5, 3, "Error")
         Sleep, 3000
         ExitApp, 1
     }
@@ -54,17 +65,17 @@ Main() {
     needsUpdate := false
     if (!rhExists) {
         needsUpdate := true
-        TrayTip, AHK-Hacker, ResourceHacker.exe not found. Downloading..., 3, 1
+        ShowNotification("ResourceHacker.exe not found. Downloading...", 3, 1)
     } else if (savedVersion = "") {
         needsUpdate := true
-        TrayTip, AHK-Hacker, First time version check. Downloading..., 3, 1
+        ShowNotification("First time version check. Downloading...", 3, 1)
     } else if (serverVersion != savedVersion) {
         needsUpdate := true
-        TrayTip, AHK-Hacker, New version available! Downloading..., 3, 1
+        ShowNotification("New version available! Downloading...", 3, 1)
     }
 
     if (!needsUpdate) {
-        TrayTip, AHK-Hacker, Resource Hacker is already up to date., 5, 1
+        ShowNotification("Resource Hacker is already up to date.", 5, 1)
         Sleep, 3000
         ExitApp, 0
     }
@@ -72,17 +83,17 @@ Main() {
     Sleep, 1000
 
     ; Download and install
-    TrayTip, AHK-Hacker, Downloading Resource Hacker..., 3, 1
+    ShowNotification("Downloading Resource Hacker...", 3, 1)
     if (DownloadAndInstall()) {
         ; Save version info
         FileDelete, %VersionFile%
         FileAppend, %serverVersion%, %VersionFile%
 
-        TrayTip, AHK-Hacker, Resource Hacker updated successfully!, 5, 1
+        ShowNotification("Resource Hacker updated successfully!", 5, 1)
         Sleep, 3000
         ExitApp, 0
     } else {
-        TrayTip, AHK-Hacker Error, Failed to update Resource Hacker., 5, 3
+        ShowNotification("Failed to update Resource Hacker.", 5, 3, "Error")
         Sleep, 3000
         ExitApp, 1
     }
@@ -164,4 +175,13 @@ DownloadAndInstall() {
     FileDelete, %TempZipFile%
 
     return true
+}
+
+ShowNotification(message, timeout := 3, icon := 1, title := "AHK-Hacker") {
+    if (!SilentMode) {
+        if (title = "Error")
+            TrayTip, AHK-Hacker Error, %message%, %timeout%, %icon%
+        else
+            TrayTip, %title%, %message%, %timeout%, %icon%
+    }
 }
