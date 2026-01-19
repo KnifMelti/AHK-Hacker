@@ -94,6 +94,14 @@ if (FileExist(resourceHackerPath)) {
     RunWait, %cmd%, , Hide
     Sleep, 100
 
+    ; Convert log file from UTF-16 LE to UTF-8
+    if (FileExist(logFile)) {
+        FileRead, logContent, %logFile%
+        FileDelete, %logFile%
+        FileAppend, %logContent%, %logFile%, UTF-8
+        logContent := ""
+    }
+
     ; Check if any .bin files were extracted
     Loop, Files, RCDATA*.bin
     {
@@ -110,6 +118,14 @@ if (!binFound && FileExist(resourceHacker4Path)) {
     cmd := """" . resourceHacker4Path . """ -open """ . exePath . """ -save RCData.rc -action extract -mask RCDATA,, -log """ . logFile . """"
     RunWait, %cmd%, , Hide
     Sleep, 100
+
+    ; Convert log file from UTF-16 LE to UTF-8
+    if (FileExist(logFile)) {
+        FileRead, logContent, %logFile%
+        FileDelete, %logFile%
+        FileAppend, %logContent%, %logFile%, UTF-8
+        logContent := ""
+    }
 
     ; Check again for .bin files
     Loop, Files, RCDATA*.bin
