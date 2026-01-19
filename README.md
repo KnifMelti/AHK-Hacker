@@ -67,19 +67,20 @@ The script uses HTTP HEAD requests to check for updates without downloading the 
 
 ```
 AHK-Hacker\
-├── AHK-Hacker.ahk           (Main decompiler script)
-├── AHK-Hacker.exe           (Compiled and signed executable)
-├── Install-ContextMenu.ahk  (Installs right-click menu)
-├── Uninstall-ContextMenu.ahk
-├── Update-ResourceHacker.ahk
-├── Icon.ico
-├── README.md
-├── log\                    (Decompilation logs)
+├── AHK-Hacker.ahk            (Main decompiler script)
+├── AHK-Hacker.exe            (Compiled and signed executable)
+├── Install-ContextMenu.ahk   (Installs right-click menu)
+├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
+├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
+├── RH.ico                    (Resource Hacker icon)
+├── README.md                 (You're reading it...)
+├── log\                      (Decompilation logs)
 └── lib\
-    ├── ResourceHacker.exe   (Downloaded automatically - v5.x)
-    ├── ResourceHacker4.exe  (Bundled legacy version - v4.x)
-    ├── .rh_version          (Version cache)
-    └── Help\                (ResourceHacker documentation)
+    ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
+    ├── ResourceHacker4.exe   (Bundled legacy version - v4.x)
+    ├── .rh_version           (Version cache)
+    ├── help                  (ResourceHacker documentation)
+    └── samples\              (ResourceHacker samples)
 ```
 
 ---
@@ -149,5 +150,5 @@ Works with compiled scripts from:
 
 ## Credits
 
-- **AHK-Hacker** based on AutoHotkey Decompiler v2.97.00C by Jake (A-gent)
+- **AHK-Hacker** based on [AutoHotkey Decompiler v2.97.00C by Jake (A-gent)](https://github.com/A-gent/AutoHotkey-Decompiler)
 - **ResourceHacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
