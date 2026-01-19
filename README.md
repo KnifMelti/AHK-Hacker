@@ -149,7 +149,7 @@ The context menu entry will be removed immediately.
 ### Registry Location
 
 ```
-HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHKHacker
+HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker
 ```
 
 ### Supported AutoHotkey Versions
@@ -165,3 +165,4 @@ Works with compiled scripts from:
 
 - **AHK-Hacker** based on [AutoHotkey Decompiler v2.97.00C by Jake (A-gent)](https://github.com/A-gent/AutoHotkey-Decompiler)
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
+
