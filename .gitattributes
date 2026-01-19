@@ -1,0 +1,12 @@
+# Prevent normalization - store CRLF in repository
+* -text
+
+# Explicitly mark text file types with CRLF (no normalization)
+*.ahk -text
+*.md -text
+*.ps1 -text
+*.yml -text
+
+# Binary files (prevent any modification)
+*.exe binary
+*.ico binary
