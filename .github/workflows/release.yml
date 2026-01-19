@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   release:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -35,17 +35,14 @@ jobs:
           cp lib/ResourceHacker4.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
 
       - name: Create release archive
-        shell: powershell
         run: |
-          Compress-Archive -Path "AHK-Hacker-v${{ steps.version.outputs.VERSION }}" -DestinationPath "AHK-Hacker-v${{ steps.version.outputs.VERSION }}.zip"
+          zip -r AHK-Hacker-v${{ steps.version.outputs.VERSION }}.zip AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           name: Release v${{ steps.version.outputs.VERSION }}
           body: |
-            AutoHotkey decompiler with Windows context menu integration.
-
             **Installation:**
             1. Download and extract the zip file
             2. Right-click `Install.ps1` → "Run with PowerShell"
@@ -56,3 +53,4 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+          append_body: true

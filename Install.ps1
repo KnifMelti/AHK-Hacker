@@ -19,7 +19,7 @@ Write-Host "Updating ResourceHacker..." -ForegroundColor Yellow
 $updaterPath = Join-Path $scriptPath "Update-ResourceHacker.ahk"
 
 if (Test-Path $updaterPath) {
-    Start-Process -FilePath $updaterPath -Wait
+    Start-Process -FilePath $updaterPath -WindowStyle Hidden -Wait
     Write-Host "ResourceHacker updated!" -ForegroundColor Green
 } else {
     Write-Host "Warning: Update-ResourceHacker.ahk not found!" -ForegroundColor Yellow
