@@ -83,8 +83,7 @@ Main() {
     Sleep, 1000
 
     ; Download and install
-    ShowNotification("Downloading Resource Hacker...", 3, 1)
-    if (DownloadAndInstall()) {
+   if (DownloadAndInstall()) {
         ; Save version info
         FileDelete, %VersionFile%
         FileAppend, %serverVersion%, %VersionFile%
