@@ -1,7 +1,7 @@
 #NoEnv
 #Warn
 #SingleInstance Force
-;@Ahk2Exe-Base 1.1.37.02
+;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v1.1.37.02\Unicode 64-bit.bin
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, Context Menu Decompiler
