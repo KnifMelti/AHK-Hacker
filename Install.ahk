@@ -23,6 +23,9 @@ scriptDir := A_ScriptDir
 ShowProgress("Unblocking files...", 1)
 
 ; Unblock all files recursively using PowerShell
+; Note: -ExecutionPolicy Bypass is required because downloaded files are marked as
+; "from internet" until unblocked. This is the same approach used by Install.ps1
+; and Update-ResourceHacker.ahk. The Bypass policy is only for this single command.
 ; Escape single quotes in path by doubling them for PowerShell
 escapedScriptDir := StrReplace(scriptDir, "'", "''")
 psUnblock := 'powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path ''' . escapedScriptDir . ''' -Recurse | Unblock-File -ErrorAction SilentlyContinue"'
@@ -45,6 +48,8 @@ if (FileExist(updaterPath)) {
     RunWait('"' . updaterPath . '" /silent', , "Hide")
     ShowProgress("ResourceHacker updated!", 2)
 } else {
+    ; Update-ResourceHacker.ahk missing is a warning, not fatal error
+    ; ResourceHacker4.exe is bundled as fallback in lib folder
     ShowProgress("Warning: Update-ResourceHacker.ahk not found!", 3)
 }
 
@@ -63,6 +68,7 @@ if (FileExist(installerPath)) {
     RunWait('"' . installerPath . '"')
     ShowProgress("Context menu installed!", 2)
 } else {
+    ; Install-ContextMenu.ahk is required - fatal error if missing
     ShowProgress("Error: Install-ContextMenu.ahk not found!", 3)
     MsgBox("Installation failed!`n`nInstall-ContextMenu.ahk not found.", "Error", 16)
     ExitApp(1)
@@ -82,6 +88,7 @@ ExitApp(0)
 ; ====================================================================
 
 ShowProgress(message, iconType := 1) {
-    ; Icon types: 1=Info, 2=Success, 3=Warning
+    ; Icon types match AHK 2.0 TrayTip options (consistent with rest of codebase):
+    ; 1 = Info icon, 2 = Warning icon, 3 = Error icon
     TrayTip(message, "AHK-Hacker Installation", iconType)
 }
