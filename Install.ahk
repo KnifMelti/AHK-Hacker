@@ -23,7 +23,9 @@ scriptDir := A_ScriptDir
 ShowProgress("Unblocking files...", 1)
 
 ; Unblock all files recursively using PowerShell
-psUnblock := 'powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path ''' . scriptDir . ''' -Recurse | Unblock-File -ErrorAction SilentlyContinue"'
+; Escape single quotes in path by doubling them for PowerShell
+escapedScriptDir := StrReplace(scriptDir, "'", "''")
+psUnblock := 'powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem -Path ''' . escapedScriptDir . ''' -Recurse | Unblock-File -ErrorAction SilentlyContinue"'
 RunWait(psUnblock, , "Hide")
 
 ShowProgress("All files unblocked!", 2)
@@ -39,6 +41,7 @@ updaterPath := scriptDir . "\Update-ResourceHacker.ahk"
 
 if (FileExist(updaterPath)) {
     ; Run updater in silent mode (it will show TrayTips for progress)
+    ; Path is from A_ScriptDir (trusted system variable), properly quoted for spaces
     RunWait('"' . updaterPath . '" /silent', , "Hide")
     ShowProgress("ResourceHacker updated!", 2)
 } else {
@@ -56,6 +59,7 @@ ShowProgress("Installing context menu integration...", 1)
 installerPath := scriptDir . "\Install-ContextMenu.ahk"
 
 if (FileExist(installerPath)) {
+    ; Path is from A_ScriptDir (trusted system variable), properly quoted for spaces
     RunWait('"' . installerPath . '"')
     ShowProgress("Context menu installed!", 2)
 } else {
