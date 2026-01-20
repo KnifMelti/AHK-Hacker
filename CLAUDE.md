@@ -21,7 +21,8 @@ AHK-Hacker\
 ├── Install-ContextMenu.ahk   (Installs right-click menu)
 ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
 ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
-├── Install.ps1               (PowerShell installer - unblocks files)
+├── Install.ahk               (AHK installer - unblocks files)
+├── Install.ps1               (PowerShell installer - alternative)
 ├── RH.ico                    (Resource Hacker icon)
 ├── README.md                 (User documentation)
 ├── CLAUDE.md                 (This file - developer documentation)
@@ -44,6 +45,14 @@ Main decompiler that:
 4. Handles both old (`RCData.bin`) and new (`RCDATA1_1.bin`) output formats
 5. Converts line endings to Windows CRLF
 6. Outputs `filename_decompiled.ahk` in same folder as source
+
+### Install.ahk
+Installation script that:
+1. Unblocks all files recursively using PowerShell
+2. Runs Update-ResourceHacker.ahk in silent mode to download latest ResourceHacker
+3. Runs Install-ContextMenu.ahk to register context menu
+4. Shows progress notifications via TrayTip
+Alternative: Install.ps1 (PowerShell version with same functionality)
 
 ### Update-ResourceHacker.ahk
 Updater that:
