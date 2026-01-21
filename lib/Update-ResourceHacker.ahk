@@ -1,5 +1,6 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
+#Include Notifications.ahk
 
 ; ====================================================================
 ; AHK-Hacker - Resource Hacker Updater
@@ -13,10 +14,10 @@
 
 ; Configuration
 global RH_URL := "https://www.angusj.com/resourcehacker/resource_hacker.zip"
-global LibraryDir := A_ScriptDir . "\lib"
-global VersionFile := LibraryDir . "\.rh_version"
-global TempZipFile := LibraryDir . "\resource_hacker_temp.zip"
-global ResourceHackerExe := LibraryDir . "\ResourceHacker.exe"
+global BinDir := A_ScriptDir . "\..\bin"
+global VersionFile := BinDir . "\.rh_version"
+global TempZipFile := BinDir . "\resource_hacker_temp.zip"
+global ResourceHackerExe := BinDir . "\ResourceHacker.exe"
 global SilentMode := false
 
 ; Check for silent mode parameter
@@ -34,18 +35,22 @@ return
 
 Main() {
     ; Show progress
-    ShowNotification("Checking for Resource Hacker updates...", 3, 1)
+    if (!SilentMode) {
+        ShowProgress("Checking for Resource Hacker updates...", 1)
+    }
     Sleep(500)
 
-    ; Ensure library directory exists
-    if (!FileExist(LibraryDir)) {
-        DirCreate(LibraryDir)
+    ; Ensure bin directory exists
+    if (!FileExist(BinDir)) {
+        DirCreate(BinDir)
     }
 
     ; Get current server version info (Last-Modified header)
     serverVersion := GetServerVersion()
     if (serverVersion = "ERROR") {
-        ShowNotification("Failed to check for updates.`nCheck your internet connection.", 5, 3, "Error")
+        if (!SilentMode) {
+            ShowProgress("Failed to check for updates.`n`nCheck your internet connection.", 3, "AHK-Hacker Error")
+        }
         Sleep(3000)
         ExitApp(1)
     }
@@ -64,17 +69,25 @@ Main() {
     needsUpdate := false
     if (!rhExists) {
         needsUpdate := true
-        ShowNotification("ResourceHacker.exe not found. Downloading...", 3, 1)
+        if (!SilentMode) {
+            ShowProgress("ResourceHacker.exe not found. Downloading...", 1)
+        }
     } else if (savedVersion = "") {
         needsUpdate := true
-        ShowNotification("First time version check. Downloading...", 3, 1)
+        if (!SilentMode) {
+            ShowProgress("First time version check. Downloading...", 1)
+        }
     } else if (serverVersion != savedVersion) {
         needsUpdate := true
-        ShowNotification("New version available! Downloading...", 3, 1)
+        if (!SilentMode) {
+            ShowProgress("New version available! Downloading...", 1)
+        }
     }
 
     if (!needsUpdate) {
-        ShowNotification("Resource Hacker is already up to date.", 5, 1)
+        if (!SilentMode) {
+            ShowProgress("Resource Hacker is already up to date.", 1)
+        }
         Sleep(3000)
         ExitApp(0)
     }
@@ -89,11 +102,15 @@ Main() {
         }
         FileAppend(serverVersion, VersionFile)
 
-        ShowNotification("Resource Hacker updated successfully!", 5, 1)
+        if (!SilentMode) {
+            ShowProgress("Resource Hacker updated successfully!", 0)
+        }
         Sleep(3000)
         ExitApp(0)
     } else {
-        ShowNotification("Failed to update Resource Hacker.", 5, 3, "Error")
+        if (!SilentMode) {
+            ShowProgress("Failed to update Resource Hacker.", 3, "AHK-Hacker Error")
+        }
         Sleep(3000)
         ExitApp(1)
     }
@@ -158,14 +175,14 @@ DownloadAndInstall() {
     }
 
     ; Extract ZIP using PowerShell
-    psCmd := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command `"Expand-Archive -Path '" . TempZipFile . "' -DestinationPath '" . LibraryDir . "' -Force`""
+    psCmd := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command `"Expand-Archive -Path '" . TempZipFile . "' -DestinationPath '" . BinDir . "' -Force`""
     RunWait(psCmd, , "Hide")
 
     ; Wait for extraction to complete
     Sleep(500)
 
     ; Unblock all extracted files (remove "downloaded from internet" flag)
-    psUnblock := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command `"Get-ChildItem -Path '" . LibraryDir . "' -Recurse | Unblock-File`""
+    psUnblock := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command `"Get-ChildItem -Path '" . BinDir . "' -Recurse | Unblock-File`""
     RunWait(psUnblock, , "Hide")
 
     ; Verify extraction
@@ -181,11 +198,3 @@ DownloadAndInstall() {
     return true
 }
 
-ShowNotification(message, timeout := 3, icon := 1, title := "AHK-Hacker") {
-    if (!SilentMode) {
-        if (title = "Error")
-            TrayTip(message, "AHK-Hacker Error", icon)
-        else
-            TrayTip(message, title, icon)
-    }
-}

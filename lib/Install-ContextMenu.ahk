@@ -1,6 +1,6 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
-#Include lib/Notifications.ahk
+#Include Notifications.ahk
 
 ; ====================================================================
 ; AHK-Hacker - Context Menu Installer
@@ -24,8 +24,8 @@ Loop A_Args.Length {
     }
 }
 
-; Get script directory (where AHK-Hacker.exe is located)
-scriptDir := A_ScriptDir
+; Get parent directory (Install-ContextMenu.ahk is in lib/, AHK-Hacker.exe is in parent)
+scriptDir := A_ScriptDir . "\.."
 decompilerPath := scriptDir . "\AHK-Hacker.exe"
 
 ; Check that AHK-Hacker.exe exists

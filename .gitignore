@@ -1,18 +1,8 @@
 # Logs
 log/*.log
 
-# ResourceHacker (downloaded by Update-ResourceHacker.ahk)
-lib/ResourceHacker.exe
-lib/ResourceHacker.ini
-lib/ResourceHacker.def
-lib/ReadMe.txt
-lib/changes.txt
-lib/.rh_version
-lib/Help/
-lib/samples/
-
-# ResourceHacker4 auto-generated files
-lib/ResourceHacker4.ini
+# ResourceHacker bin folder (all executables and downloaded files)
+bin/
 
 # Temporary files
 *.bin

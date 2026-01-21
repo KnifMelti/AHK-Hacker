@@ -18,20 +18,22 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 AHK-Hacker\
 ├── AHK-Hacker.ahk            (Main decompiler script)
 ├── AHK-Hacker.exe            (Compiled and signed executable)
-├── Install-ContextMenu.ahk   (Installs right-click menu)
-├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
-├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
-├── Install.ahk               (AHK installer - unblocks files)
+├── Install.ahk               (Installer - unblocks files, prompts OK/Cancel)
+├── Uninstall.ahk             (Uninstaller - removes context menu, cleans bin/)
 ├── RH.ico                    (Resource Hacker icon)
 ├── README.md                 (User documentation)
 ├── CLAUDE.md                 (This file - developer documentation)
 ├── log\                      (Decompilation logs)
-└── lib\
-    ├── Notifications.ahk     (Shared notification library)
+├── lib\                      (Shared libraries - synced to GitHub)
+│   ├── Notifications.ahk     (Shared notification library)
+│   ├── Install-ContextMenu.ahk   (Installs right-click menu)
+│   ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
+│   └── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
+└── bin\                      (ResourceHacker executables - git-ignored)
     ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
     ├── ResourceHacker4.exe   (Bundled legacy version - v4.x)
     ├── .rh_version           (Version cache)
-    ├── help                  (Resource Hacker documentation)
+    ├── Help\                 (Resource Hacker documentation)
     └── samples\              (Resource Hacker samples)
 ```
 
@@ -48,25 +50,41 @@ Main decompiler that:
 
 ### Install.ahk
 Installation script that:
-1. Unblocks all files recursively using PowerShell
-2. Runs Update-ResourceHacker.ahk in silent mode to download latest ResourceHacker
-3. Runs Install-ContextMenu.ahk to register context menu
-4. Shows progress notifications via TrayTip
+1. Shows OK/Cancel dialog before starting installation
+2. Unblocks all files recursively using PowerShell
+3. Runs lib/Update-ResourceHacker.ahk in silent mode to download latest ResourceHacker to bin/
+4. Runs lib/Install-ContextMenu.ahk to register context menu
+5. Shows progress notifications via ShowProgress from lib/Notifications.ahk
 
-### Update-ResourceHacker.ahk
+### Uninstall.ahk
+Uninstallation script that:
+1. Shows OK/Cancel dialog before starting uninstallation
+2. Runs lib/Uninstall-ContextMenu.ahk in silent mode to remove context menu
+3. Cleans up downloaded files from bin/ (ResourceHacker.exe, Help/, samples/, .rh_version, etc.)
+4. Keeps ResourceHacker4.exe (bundled version)
+5. Shows progress notifications via ShowProgress from lib/Notifications.ahk
+
+### lib/Update-ResourceHacker.ahk
 Updater that:
 1. Sends HTTP HEAD request to check Last-Modified header
-2. Compares with cached `.rh_version` file
+2. Compares with cached `bin/.rh_version` file
 3. Downloads ZIP only if newer version available
-4. Extracts and unblocks files (removes "downloaded from internet" flag)
+4. Extracts to bin/ folder and unblocks files (removes "downloaded from internet" flag)
+5. Supports `/silent` parameter to suppress notifications
 
-### Install/Uninstall-ContextMenu.ahk
-Registry scripts that add/remove context menu entry at:
+### lib/Install-ContextMenu.ahk
+Registry script that adds context menu entry at:
 ```
 HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker
 ```
 No admin rights required.
-Supports `/silent` parameter to run without message boxes (uses TrayTip notifications instead).
+Supports `/silent` parameter to run without message boxes (uses ShowProgress notifications instead).
+Looks for AHK-Hacker.exe in parent directory (since script is in lib/ folder).
+
+### lib/Uninstall-ContextMenu.ahk
+Registry script that removes context menu entry.
+No admin rights required.
+Supports `/silent` parameter to run without message boxes (uses ShowProgress notifications instead).
 
 ### lib/Notifications.ahk
 Shared notification library that provides:
@@ -77,8 +95,8 @@ Shared notification library that provides:
 ## Development Notes
 
 ### ResourceHacker Compatibility
-- **ResourceHacker 5.x**: Latest version, downloaded by Update-ResourceHacker.ahk. Output naming: `RCDATA1_1.bin`
-- **ResourceHacker 4.x**: Bundled legacy version (`ResourceHacker4.exe`). Required for older AHK executables that use `>AHK WITH ICON<` resource naming. Output naming: `RCData.bin`
+- **ResourceHacker 5.x**: Latest version, downloaded by lib/Update-ResourceHacker.ahk to bin/ folder. Output naming: `RCDATA1_1.bin`
+- **ResourceHacker 4.x**: Bundled legacy version (`bin/ResourceHacker4.exe`). Required for older AHK executables that use `>AHK WITH ICON<` resource naming. Output naming: `RCData.bin`
 
 The decompiler tries 5.x first, then falls back to 4.x automatically.
 
@@ -86,13 +104,14 @@ The decompiler tries 5.x first, then falls back to 4.x automatically.
 `AHK-Hacker.exe` is pre-compiled and digitally signed. The source `AHK-Hacker.ahk` is included for reference.
 
 ### Testing
-1. Run `Update-ResourceHacker.ahk` to download ResourceHacker 5.x
-2. Run `Install-ContextMenu.ahk`
-3. Right-click any AHK-compiled .exe and select "AHK-Hacker - Decompile"
+1. Run `Install.ahk` (prompts OK/Cancel, then downloads ResourceHacker 5.x to bin/ and installs context menu)
+   - Or run `lib/Update-ResourceHacker.ahk` manually to download ResourceHacker 5.x
+   - Or run `lib/Install-ContextMenu.ahk` manually to register context menu
+2. Right-click any AHK-compiled .exe and select "AHK-Hacker - Decompile"
 
 ## Common Issues
 
-- **"ResourceHacker.exe not found"**: Run `Update-ResourceHacker.ahk` (note: `ResourceHacker4.exe` is bundled and should always be present)
+- **"ResourceHacker.exe not found in bin folder"**: Run `lib/Update-ResourceHacker.ahk` (note: `bin/ResourceHacker4.exe` is bundled and should always be present)
 - **"Failed to extract script data"**: The .exe is not an AHK executable or uses encryption
-- **Context menu missing**: Run `Install-ContextMenu.ahk`, restart Explorer if needed
+- **Context menu missing**: Run `lib/Install-ContextMenu.ahk`, restart Explorer if needed
 

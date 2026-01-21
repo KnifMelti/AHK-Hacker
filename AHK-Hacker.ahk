@@ -1,10 +1,11 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
+#Include lib/Notifications.ahk
 ;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.0.0.0
+;@Ahk2Exe-Set FileVersion, 3.1.0.0
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -36,14 +37,14 @@ SetWorkingDir(A_ScriptDir)
 
 ; Validate input file exists
 if (!FileExist(exePath)) {
-    TrayTip("File not found: " . exePath, "AHK-Hacker Error", 3)
+    ShowProgress("File not found: " . exePath, 3, "AHK-Hacker Error")
     ExitApp(1)
 }
 
 ; Check that it's an .exe file
 SplitPath(exePath, &fileName, &fileDir, &fileExt)
 if (fileExt != "exe") {
-    TrayTip("Not an executable file!", "AHK-Hacker Error", 3)
+    ShowProgress("Not an executable file!", 3, "AHK-Hacker Error")
     ExitApp(1)
 }
 
@@ -78,12 +79,12 @@ Loop Files "RCDATA*.bin"
 ; ====================================================================
 
 ; Build paths to ResourceHacker versions
-resourceHackerPath := A_ScriptDir . "\lib\ResourceHacker.exe"
-resourceHacker4Path := A_ScriptDir . "\lib\ResourceHacker4.exe"
+resourceHackerPath := A_ScriptDir . "\bin\ResourceHacker.exe"
+resourceHacker4Path := A_ScriptDir . "\bin\ResourceHacker4.exe"
 
 ; Check that at least one ResourceHacker exists
 if (!FileExist(resourceHackerPath) && !FileExist(resourceHacker4Path)) {
-    TrayTip("ResourceHacker.exe not found in lib folder!`n`nRun Update-ResourceHacker.ahk to download it.", "AHK-Hacker Error", 3)
+    ShowProgress("ResourceHacker.exe not found in bin folder!`n`nRun Update-ResourceHacker.ahk to download it.", 3, "AHK-Hacker Error")
     ExitApp(1)
 }
 
@@ -151,7 +152,7 @@ if (!binFound && FileExist(resourceHacker4Path)) {
 
 ; Check that extraction succeeded
 if (!binFound) {
-    TrayTip("Not an AutoHotkey executable or packed/protected: " . fileName, "AHK-Hacker Error", 3)
+    ShowProgress("Not an AutoHotkey executable or packed/protected: " . fileName, 3, "AHK-Hacker Error")
     try FileDelete("RCData.rc")
     ExitApp(1)
 }
@@ -181,7 +182,7 @@ if (FileExist("RCData.bin")) {
 
 ; Check that a .bin file was found
 if (binFile = "") {
-    TrayTip("Failed to extract script data!`n`nThis file may not be an AutoHotkey executable.", "AHK-Hacker Error", 3)
+    ShowProgress("Failed to extract script data!`n`nThis file may not be an AutoHotkey executable.", 3, "AHK-Hacker Error")
     ExitApp(1)
 }
 
@@ -189,7 +190,7 @@ if (binFile = "") {
 try {
     scriptContent := FileRead(binFile)
 } catch Error as err {
-    TrayTip("Failed to read script data!", "AHK-Hacker Error", 3)
+    ShowProgress("Failed to read script data!", 3, "AHK-Hacker Error")
     try FileDelete(binFile)
     ExitApp(1)
 }
@@ -203,7 +204,7 @@ try FileDelete(outputPath)
 try {
     FileAppend(scriptContent, outputPath)
 } catch Error as err {
-    TrayTip("Failed to create output file: " . outputPath, "AHK-Hacker Error", 3)
+    ShowProgress("Failed to create output file: " . outputPath, 3, "AHK-Hacker Error")
     try FileDelete(binFile)
     ExitApp(1)
 }
@@ -231,7 +232,7 @@ Loop Files "RCDATA*.bin"
 ; ====================================================================
 
 ; Show success message
-TrayTip(outputName . ".ahk", "AHK-Hacker Decompiled", 1)
+ShowProgress(outputName . ".ahk", 0, "AHK-Hacker Decompiled")
 
 ; Wait a bit so the notification has time to show
 Sleep(2000)

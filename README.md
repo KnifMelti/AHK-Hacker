@@ -25,10 +25,11 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 1. Download the latest release zip from [Releases](https://github.com/KnifMelti/AHK-Hacker/releases)
 2. Extract the zip file anywhere you like
 3. **Double-click `Install.ahk`**
+4. Click **OK** on the installation prompt (or Cancel to abort)
 
 This will automatically:
 - Unblock all files (removes Windows security warnings)
-- Download the latest ResourceHacker 5.x
+- Download the latest ResourceHacker 5.x to `bin/` folder
 - Install the context menu integration
 
 **Done!** No administrator privileges required.
@@ -38,8 +39,8 @@ This will automatically:
 If you prefer to install manually:
 1. Extract the zip file
 2. Unblock files if needed (right-click files → Properties → Unblock)
-3. Run `Update-ResourceHacker.ahk` to download ResourceHacker 5.x
-4. Run `Install-ContextMenu.ahk` to add the context menu
+3. Run `lib\Update-ResourceHacker.ahk` to download ResourceHacker 5.x to `bin/` folder
+4. Run `lib\Install-ContextMenu.ahk` to add the context menu
 
 ---
 
@@ -65,9 +66,9 @@ Log:    [AHK-Hacker folder]\log\MyScript_decompile_20250118_143052.log
 
 ## Updating Resource Hacker
 
-Run `Update-ResourceHacker.ahk` to check for and download the latest version of Resource Hacker.
+Run `lib\Update-ResourceHacker.ahk` to check for and download the latest version of Resource Hacker.
 
-The script uses HTTP HEAD requests to check for updates without downloading the full file each time. Version information is cached in `lib\.rh_version`.
+The script uses HTTP HEAD requests to check for updates without downloading the full file each time. Version information is cached in `bin\.rh_version`.
 
 ---
 
@@ -77,19 +78,21 @@ The script uses HTTP HEAD requests to check for updates without downloading the 
 AHK-Hacker\
 ├── AHK-Hacker.ahk            (Main decompiler script)
 ├── AHK-Hacker.exe            (Compiled and signed executable)
-├── Install-ContextMenu.ahk   (Installs right-click menu)
-├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
-├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
-├── Install.ahk               (AHK installer - unblocks files)
+├── Install.ahk               (Installer - unblocks files, prompts OK/Cancel)
+├── Uninstall.ahk             (Uninstaller - removes context menu, cleans bin/)
 ├── RH.ico                    (Resource Hacker icon)
 ├── README.md                 (You're reading it...)
 ├── log\                      (Decompilation logs)
-└── lib\
-    ├── Notifications.ahk     (Shared notification library)
+├── lib\                      (Shared libraries - synced to GitHub)
+│   ├── Notifications.ahk     (Shared notification library)
+│   ├── Install-ContextMenu.ahk   (Installs right-click menu)
+│   ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
+│   └── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
+└── bin\                      (ResourceHacker executables - git-ignored)
     ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
     ├── ResourceHacker4.exe   (Bundled legacy version - v4.x)
     ├── .rh_version           (Version cache)
-    ├── help                  (Resource Hacker documentation)
+    ├── Help\                 (Resource Hacker documentation)
     └── samples\              (Resource Hacker samples)
 ```
 
@@ -97,20 +100,31 @@ AHK-Hacker\
 
 ## Uninstallation
 
-### Remove Context Menu
+### Recommended: Automated Uninstall
 
-1. Double-click `Uninstall-ContextMenu.ahk`
-2. Click **OK** on the confirmation message
+1. **Double-click `Uninstall.ahk`**
+2. Click **OK** on the uninstallation prompt (or Cancel to abort)
 
-The context menu entry will be removed immediately.
+This will automatically:
+- Remove the context menu integration
+- Delete downloaded ResourceHacker files from `bin/` folder
+- Keep ResourceHacker4.exe (bundled version)
+
+**Note:** The AHK-Hacker folder itself is not deleted. You can manually delete it if you want to remove everything.
+
+### Manual Uninstall
+
+If you prefer to uninstall manually:
+1. Run `lib\Uninstall-ContextMenu.ahk` to remove the context menu
+2. Manually delete the `bin/` folder if desired
 
 ---
 
 ## Troubleshooting
 
-### "ResourceHacker.exe not found"
+### "ResourceHacker.exe not found in bin folder"
 
-**Solution:** Run `Update-ResourceHacker.ahk` to download it.
+**Solution:** Run `lib\Update-ResourceHacker.ahk` to download it to the `bin/` folder.
 
 ### "Not an AutoHotkey executable"
 
@@ -127,13 +141,13 @@ The context menu entry will be removed immediately.
 ### Context menu doesn't appear
 
 **Solutions:**
-1. Run `Install-ContextMenu.ahk` again
+1. Run `lib\Install-ContextMenu.ahk` again
 2. Restart Windows Explorer (Task Manager → Restart "Windows Explorer")
-3. Check Registry: `HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHKHacker`
+3. Check Registry: `HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker`
 
 ### Files are blocked / Security warnings
 
-**Solution:** Run `Install.ps1` with PowerShell - it automatically unblocks all files.
+**Solution:** Run `Install.ahk` - it automatically unblocks all files.
 
 ---
 
