@@ -182,8 +182,6 @@ Works with compiled scripts from:
 
 ## Credits
 
-- **AutoHotkey** - [Powerful. Easy to learn.](https://www.autohotkey.com/)
 - **AHK-Hacker** based on [AutoHotkey Decompiler v2.97.00C by Jake (A-gent)](https://github.com/A-gent/AutoHotkey-Decompiler)
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
-
-
+- **AutoHotkey - Powerful. Easy to learn.** [The ultimate automation scripting language for Windows.](https://www.autohotkey.com/)
