@@ -28,12 +28,13 @@ Loop A_Args.Length {
 scriptDir := A_ScriptDir . "\.."
 decompilerPath := scriptDir . "\AHK-Hacker.exe"
 
+; Convert to absolute path (remove any ".." in the path)
+Loop Files, decompilerPath
+    decompilerPath := A_LoopFileFullPath
+
 ; Check that AHK-Hacker.exe exists
 if (!FileExist(decompilerPath)) {
-    if (SilentMode) {
-        ShowProgress("AHK-Hacker.exe not found!", 3, "AHK-Hacker")
-        Sleep(3000)
-    } else {
+    if (!SilentMode) {
         MsgBox("AHK-Hacker.exe not found!`n`nExpected location: " . decompilerPath . "`n`nPlease compile AHK-Hacker.ahk first by right-clicking it and selecting 'Compile Script'.", "Error", 16)
     }
     ExitApp(1)
@@ -42,23 +43,17 @@ if (!FileExist(decompilerPath)) {
 ; Check if already installed
 try {
     existingValue := RegRead("HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker")
-    if (SilentMode) {
-        ; Already installed is not an error in silent mode, just continue
-        ExitApp(0)
-    } else {
+    if (!SilentMode) {
         MsgBox("Context menu is already installed!`n`nTo reinstall, run Uninstall-ContextMenu.ahk first.", "Already Installed", 48)
-        ExitApp(0)
     }
+    ExitApp(0)
 }
 
 ; Register in registry (HKEY_CURRENT_USER - no admin required)
 try {
     RegWrite("AHK-Hacker - Decompile", "REG_SZ", "HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker")
 } catch Error as err {
-    if (SilentMode) {
-        ShowProgress("Failed to write menu entry to registry!", 3, "AHK-Hacker")
-        Sleep(3000)
-    } else {
+    if (!SilentMode) {
         MsgBox("Failed to write menu entry to registry!`n`nError: " . err.Message, "Installation Failed", 16)
     }
     ExitApp(1)
@@ -67,10 +62,7 @@ try {
 try {
     RegWrite(decompilerPath . ",0", "REG_SZ", "HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker", "Icon")
 } catch Error as err {
-    if (SilentMode) {
-        ShowProgress("Menu entry created but failed to set icon.", 2, "AHK-Hacker")
-        Sleep(2000)
-    } else {
+    if (!SilentMode) {
         MsgBox("Menu entry created but failed to set icon.`n`nError: " . err.Message, "Warning", 48)
     }
 }
@@ -78,20 +70,14 @@ try {
 try {
     RegWrite('"' . decompilerPath . '" "%1"', "REG_SZ", "HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker\command")
 } catch Error as err {
-    if (SilentMode) {
-        ShowProgress("Failed to write command to registry!", 3, "AHK-Hacker")
-        Sleep(3000)
-    } else {
+    if (!SilentMode) {
         MsgBox("Failed to write command to registry!`n`nError: " . err.Message, "Installation Failed", 16)
     }
     ExitApp(1)
 }
 
-; Success message
-if (SilentMode) {
-    ShowProgress("Context menu installed successfully!", 0, "AHK-Hacker")
-    Sleep(2000)
-} else {
+; Success message (only in non-silent mode)
+if (!SilentMode) {
     MsgBox("Context menu installed successfully!`n`nYou can now right-click any .exe file and select 'AHK-Hacker - Decompile'.`n`nNote: This only affects your user account.", "Success", 64)
 }
 ExitApp(0)

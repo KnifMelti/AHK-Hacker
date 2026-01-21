@@ -28,9 +28,6 @@ if (A_Args.Length = 0) {
 
 exePath := A_Args[1]
 
-; Set working directory to script folder
-SetWorkingDir(A_ScriptDir)
-
 ; ====================================================================
 ; STEP 1: VALIDATION
 ; ====================================================================
@@ -79,8 +76,27 @@ Loop Files "RCDATA*.bin"
 ; ====================================================================
 
 ; Build paths to ResourceHacker versions
-resourceHackerPath := A_ScriptDir . "\bin\ResourceHacker.exe"
-resourceHacker4Path := A_ScriptDir . "\bin\ResourceHacker4.exe"
+; Get the directory where AHK-Hacker.exe is registered in the registry
+; Read from registry to find the actual installation path
+try {
+    registryPath := RegRead("HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker\command")
+    ; Extract path from registry value (format: "C:\path\to\AHK-Hacker.exe" "%1")
+    ; Remove quotes and the "%1" parameter
+    registryPath := StrReplace(registryPath, '"', '')
+    registryPath := Trim(StrSplit(registryPath, " ")[1])
+
+    ; Get directory from the registry path
+    SplitPath(registryPath, , &installDir)
+
+    resourceHackerPath := installDir . "\bin\ResourceHacker.exe"
+    resourceHacker4Path := installDir . "\bin\ResourceHacker4.exe"
+} catch {
+    ; Fallback: try to find bin folder relative to where we are
+    exeDir := ""
+    SplitPath(A_ScriptFullPath, , &exeDir)
+    resourceHackerPath := exeDir . "\bin\ResourceHacker.exe"
+    resourceHacker4Path := exeDir . "\bin\ResourceHacker4.exe"
+}
 
 ; Check that at least one ResourceHacker exists
 if (!FileExist(resourceHackerPath) && !FileExist(resourceHacker4Path)) {

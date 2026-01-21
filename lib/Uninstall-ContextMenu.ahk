@@ -46,18 +46,12 @@ try {
     ; Use reg.exe command for reliable deletion with /f (force) flag
     RunWait('reg.exe delete "HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker" /f', , "Hide")
 
-    if (SilentMode) {
-        ShowProgress("Context menu uninstalled successfully!", 0, "AHK-Hacker")
-        Sleep(2000)
-    } else {
+    if (!SilentMode) {
         MsgBox("Context menu uninstalled successfully!`n`nThe 'AHK-Hacker - Decompile' option has been removed from the context menu.", "Success", 64)
     }
     ExitApp(0)
 } catch Error as err {
-    if (SilentMode) {
-        ShowProgress("Failed to remove context menu entry!", 3, "AHK-Hacker Error")
-        Sleep(3000)
-    } else {
+    if (!SilentMode) {
         MsgBox("Failed to remove context menu entry.`n`nError: " . err.Message, "Error", 16)
     }
     ExitApp(1)
