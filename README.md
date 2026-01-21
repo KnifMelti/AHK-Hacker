@@ -1,3 +1,7 @@
+[![Windows Sandbox](https://img.shields.io/badge/AutoHotkey-Required-orange.svg)](https://www.autohotkey.com/)
+![GitHub all releases](https://img.shields.io/github/downloads/KnifMelti/AHK-Hacker/total)
+<img src="https://github.com/KnifMelti/AHK-Hacker/blob/main/icon.png" alt="Icon" width="128" align="right"><br><br>
+
 # AHK-Hacker
 
 AutoHotkey Decompiler with Windows Context Menu Integration
@@ -178,6 +182,8 @@ Works with compiled scripts from:
 
 ## Credits
 
+- **AutoHotkey** - [Powerful. Easy to learn.](https://www.autohotkey.com/)
 - **AHK-Hacker** based on [AutoHotkey Decompiler v2.97.00C by Jake (A-gent)](https://github.com/A-gent/AutoHotkey-Decompiler)
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
+
 
