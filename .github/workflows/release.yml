@@ -28,21 +28,30 @@ jobs:
       - name: Verify line endings (CRLF should be preserved)
         run: |
           echo "Verifying line endings in checked-out files..."
-          file -b AHK-Hacker.ahk Install-ContextMenu.ahk README.md
+          file -b AHK-Hacker.ahk Install.ahk README.md
           echo "All files should show 'CRLF line terminators'"
 
       - name: Prepare release files
         run: |
           mkdir -p AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib
+          mkdir -p AHK-Hacker-v${{ steps.version.outputs.VERSION }}/bin
+
+          # Root files
           cp AHK-Hacker.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
           cp AHK-Hacker.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
-          cp Install-ContextMenu.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
-          cp Uninstall-ContextMenu.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
-          cp Update-ResourceHacker.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
-          cp Install.ps1 AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp Install.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp Uninstall.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
           cp RH.ico AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
           cp README.md AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
-          cp lib/ResourceHacker4.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+
+          # lib/ folder - helper scripts
+          cp lib/Notifications.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+          cp lib/Install-ContextMenu.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+          cp lib/Uninstall-ContextMenu.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+          cp lib/Update-ResourceHacker.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+
+          # bin/ folder - bundled ResourceHacker4.exe
+          cp .github/workflows/bin/ResourceHacker4.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/bin/
 
       - name: Create release archive
         run: |
@@ -57,7 +66,16 @@ jobs:
           body: |
             **Installation:**
             1. Download and extract the zip file
-            2. Right-click `Install.ps1` → "Run with PowerShell"
+            2. Double-click `Install.ahk`
+            3. Click OK to proceed with installation
+
+            **What gets installed:**
+            - Unblocks all files (removes Windows security warnings)
+            - Downloads latest ResourceHacker 5.x to `bin/` folder
+            - Installs context menu integration
+
+            **Uninstallation:**
+            - Double-click `Uninstall.ahk` to remove context menu and clean up downloaded files
 
             See [README.md](README.md) for details.
           files: |
