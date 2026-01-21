@@ -69,14 +69,6 @@ jobs:
             2. Double-click `Install.ahk`
             3. Click OK to proceed with installation
 
-            **What gets installed:**
-            - Unblocks all files (removes Windows security warnings)
-            - Downloads latest ResourceHacker 5.x to `bin/` folder
-            - Installs context menu integration
-
-            **Uninstallation:**
-            - Double-click `Uninstall.ahk` to remove context menu and clean up downloaded files
-
             See [README.md](README.md) for details.
           files: |
             AHK-Hacker-v${{ steps.version.outputs.VERSION }}.zip
