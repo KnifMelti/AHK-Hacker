@@ -84,7 +84,7 @@ AHK-Hacker\
 ├── AHK-Hacker.exe            (Compiled and signed executable)
 ├── Install.ahk               (Installer - unblocks files, prompts OK/Cancel)
 ├── Uninstall.ahk             (Uninstaller - removes context menu, cleans bin/)
-├── AH.ico                    (Resource Hacker icon)
+├── RH.ico                    (Resource Hacker icon)
 ├── README.md                 (You're reading it...)
 ├── log\                      (Decompilation logs)
 ├── lib\                      (Shared libraries - synced to GitHub)

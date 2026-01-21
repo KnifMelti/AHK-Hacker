@@ -41,7 +41,7 @@ jobs:
           cp AHK-Hacker.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
           cp Install.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
           cp Uninstall.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
-          cp AH.ico AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp RH.ico AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
           cp README.md AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
 
           # lib/ folder - helper scripts
