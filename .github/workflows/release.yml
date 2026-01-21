@@ -41,7 +41,7 @@ jobs:
           cp AHK-Hacker.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
           cp Install.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
           cp Uninstall.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
-          cp RH.ico AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp res/RH.ico AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
           cp README.md AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
 
           # lib/ folder - helper scripts
@@ -51,7 +51,7 @@ jobs:
           cp lib/Update-ResourceHacker.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
 
           # bin/ folder - bundled ResourceHacker4.exe
-          cp .github/workflows/bin/ResourceHacker4.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/bin/
+          cp res/ResourceHacker4.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/bin/
 
       - name: Create release archive
         run: |

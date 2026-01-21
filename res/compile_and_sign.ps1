@@ -2,7 +2,7 @@ param([Parameter(Mandatory)]$InputFile)
 
 $inputPath = $InputFile
 $outputPath = $InputFile -replace '\.ahk$', '.exe'
-$signScript = Join-Path (Split-Path $InputFile -Parent) "sign_exe.ps1"
+$signScript = Join-Path (Split-Path $InputFile -Parent) "res/sign_exe.ps1"
 
 # AutoHotkey compiler
 $ahk2exe = "${env:ProgramFiles}\AutoHotkey\Compiler\Ahk2Exe.exe"

@@ -1,6 +1,6 @@
 [![Windows Sandbox](https://img.shields.io/badge/AutoHotkey-Required-orange.svg)](https://www.autohotkey.com/)
 ![GitHub all releases](https://img.shields.io/github/downloads/KnifMelti/AHK-Hacker/total)
-<img src="https://github.com/KnifMelti/AHK-Hacker/blob/main/icon.png" alt="Icon" width="128" align="right"><br><br>
+<img src="https://github.com/KnifMelti/AHK-Hacker/blob/main/res/icon.png" alt="Icon" width="128" align="right"><br><br>
 
 # AHK-Hacker
 

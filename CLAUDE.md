@@ -20,7 +20,6 @@ AHK-Hacker\
 ├── AHK-Hacker.exe            (Compiled and signed executable)
 ├── Install.ahk               (Installer - unblocks files, prompts OK/Cancel)
 ├── Uninstall.ahk             (Uninstaller - removes context menu, cleans bin/)
-├── RH.ico                    (Resource Hacker icon)
 ├── README.md                 (User documentation)
 ├── CLAUDE.md                 (This file - developer documentation)
 ├── log\                      (Decompilation logs)
@@ -29,9 +28,15 @@ AHK-Hacker\
 │   ├── Install-ContextMenu.ahk   (Installs right-click menu)
 │   ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
 │   └── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
-└── bin\                      (ResourceHacker executables - git-ignored)
+├── res\                      (Development resources - synced to GitHub)
+│   ├── ResourceHacker4.exe   (Bundled legacy version - v4.x, copied to bin/ in releases)
+│   ├── RH.ico                (Resource Hacker icon - used for compilation)
+│   ├── icon.png              (Project icon for README)
+│   ├── compile_and_sign.ps1  (Build script for development)
+│   └── sign_exe.ps1          (Code signing script)
+└── bin\                      (Runtime binaries - git-ignored)
     ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
-    ├── ResourceHacker4.exe   (Bundled legacy version - v4.x)
+    ├── ResourceHacker4.exe   (Copied from res/ during installation/release)
     ├── .rh_version           (Version cache)
     ├── Help\                 (Resource Hacker documentation)
     └── samples\              (Resource Hacker samples)
@@ -61,7 +66,7 @@ Uninstallation script that:
 1. Shows OK/Cancel dialog before starting uninstallation
 2. Runs lib/Uninstall-ContextMenu.ahk in silent mode to remove context menu
 3. Cleans up downloaded files from bin/ (ResourceHacker.exe, Help/, samples/, .rh_version, etc.)
-4. Keeps ResourceHacker4.exe (bundled version)
+4. Keeps ResourceHacker4.exe in bin/ (bundled version - originally from res/ in source)
 5. Shows progress notifications via ShowProgress from lib/Notifications.ahk
 
 ### lib/Update-ResourceHacker.ahk
@@ -96,9 +101,14 @@ Shared notification library that provides:
 
 ### ResourceHacker Compatibility
 - **ResourceHacker 5.x**: Latest version, downloaded by lib/Update-ResourceHacker.ahk to bin/ folder. Output naming: `RCDATA1_1.bin`
-- **ResourceHacker 4.x**: Bundled legacy version (`bin/ResourceHacker4.exe`). Required for older AHK executables that use `>AHK WITH ICON<` resource naming. Output naming: `RCData.bin`
+- **ResourceHacker 4.x**: Bundled legacy version (stored in `res/ResourceHacker4.exe` in source, copied to `bin/ResourceHacker4.exe` in release packages). Required for older AHK executables that use `>AHK WITH ICON<` resource naming. Output naming: `RCData.bin`
 
 The decompiler tries 5.x first, then falls back to 4.x automatically.
+
+**Note on file locations:**
+- **Development (source code)**: ResourceHacker4.exe is in `res/` folder (tracked in Git)
+- **Release packages**: ResourceHacker4.exe is copied to `bin/` folder by the GitHub Actions workflow
+- **Runtime**: AHK-Hacker.ahk always looks for ResourceHacker4.exe in `bin/` folder
 
 ### Building
 `AHK-Hacker.exe` is pre-compiled and digitally signed. The source `AHK-Hacker.ahk` is included for reference.
@@ -111,7 +121,18 @@ The decompiler tries 5.x first, then falls back to 4.x automatically.
 
 ## Common Issues
 
-- **"ResourceHacker.exe not found in bin folder"**: Run `lib/Update-ResourceHacker.ahk` (note: `bin/ResourceHacker4.exe` is bundled and should always be present)
+- **"ResourceHacker.exe not found in bin folder"**: Run `lib/Update-ResourceHacker.ahk` (note: `bin/ResourceHacker4.exe` is bundled in releases and should always be present)
 - **"Failed to extract script data"**: The .exe is not an AHK executable or uses encryption
 - **Context menu missing**: Run `lib/Install-ContextMenu.ahk`, restart Explorer if needed
+
+## Development Resources (res/ folder)
+
+The `res/` folder contains development-time resources that are tracked in Git:
+- **ResourceHacker4.exe**: Legacy ResourceHacker v4.x binary (copied to `bin/` in release packages)
+- **RH.ico**: Icon used during compilation (referenced in AHK-Hacker.ahk compile directive)
+- **icon.png**: Project icon displayed in README.md
+- **compile_and_sign.ps1**: PowerShell script to compile and sign the executable
+- **sign_exe.ps1**: PowerShell script for code signing with digital certificate
+
+These files are NOT distributed directly in the res/ folder. During release, ResourceHacker4.exe is copied to the bin/ folder in release packages, and RH.ico is included in the root for visibility.
 
