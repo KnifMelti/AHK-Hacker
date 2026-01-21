@@ -64,6 +64,7 @@ jobs:
         with:
           name: Release v${{ steps.version.outputs.VERSION }}
           body: |
+
             **Installation:**
             1. Download and extract the zip file
             2. Double-click `Install.ahk`
@@ -76,3 +77,4 @@ jobs:
           prerelease: false
           generate_release_notes: true
           append_body: true
+
