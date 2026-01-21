@@ -20,11 +20,11 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 
 > **Note:** AutoHotkey v2.0+ must be installed to run the helper scripts (.ahk files). Download from https://www.autohotkey.com
 
-### Recommended: PowerShell Install
+### Recommended: Automated Install
 
 1. Download the latest release zip from [Releases](https://github.com/KnifMelti/AHK-Hacker/releases)
 2. Extract the zip file anywhere you like
-3. Right-click `Install.ps1` → **"Run with PowerShell"**
+3. **Double-click `Install.ahk`**
 
 This will automatically:
 - Unblock all files (removes Windows security warnings)
@@ -80,11 +80,12 @@ AHK-Hacker\
 ├── Install-ContextMenu.ahk   (Installs right-click menu)
 ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
 ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
-├── Install.ps1               (PowerShell installer - unblocks files)
+├── Install.ahk               (AHK installer - unblocks files)
 ├── RH.ico                    (Resource Hacker icon)
 ├── README.md                 (You're reading it...)
 ├── log\                      (Decompilation logs)
 └── lib\
+    ├── Notifications.ahk     (Shared notification library)
     ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
     ├── ResourceHacker4.exe   (Bundled legacy version - v4.x)
     ├── .rh_version           (Version cache)

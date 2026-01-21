@@ -21,12 +21,13 @@ AHK-Hacker\
 ├── Install-ContextMenu.ahk   (Installs right-click menu)
 ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
 ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
-├── Install.ps1               (PowerShell installer - unblocks files)
+├── Install.ahk               (AHK installer - unblocks files)
 ├── RH.ico                    (Resource Hacker icon)
 ├── README.md                 (User documentation)
 ├── CLAUDE.md                 (This file - developer documentation)
 ├── log\                      (Decompilation logs)
 └── lib\
+    ├── Notifications.ahk     (Shared notification library)
     ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
     ├── ResourceHacker4.exe   (Bundled legacy version - v4.x)
     ├── .rh_version           (Version cache)
@@ -45,6 +46,13 @@ Main decompiler that:
 5. Converts line endings to Windows CRLF
 6. Outputs `filename_decompiled.ahk` in same folder as source
 
+### Install.ahk
+Installation script that:
+1. Unblocks all files recursively using PowerShell
+2. Runs Update-ResourceHacker.ahk in silent mode to download latest ResourceHacker
+3. Runs Install-ContextMenu.ahk to register context menu
+4. Shows progress notifications via TrayTip
+
 ### Update-ResourceHacker.ahk
 Updater that:
 1. Sends HTTP HEAD request to check Last-Modified header
@@ -58,6 +66,13 @@ Registry scripts that add/remove context menu entry at:
 HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker
 ```
 No admin rights required.
+Supports `/silent` parameter to run without message boxes (uses TrayTip notifications instead).
+
+### lib/Notifications.ahk
+Shared notification library that provides:
+- `ShowProgress(message, iconType, title)` - Display system tray notifications
+- Icon types: 0=Success, 1=Info, 2=Warning, 3=Error
+- Used by multiple scripts for consistent user feedback
 
 ## Development Notes
 
