@@ -5,10 +5,11 @@
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.1.0.0
+;@Ahk2Exe-Set FileVersion, 3.1.0.1
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
+; Icon is embedded during compilation from res/ folder (not needed by end users)
 ;@Ahk2Exe-SetMainIcon res/RH.ico
 
 ; ====================================================================
