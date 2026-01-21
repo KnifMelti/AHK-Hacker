@@ -9,7 +9,7 @@
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
-;@Ahk2Exe-SetMainIcon RH.ico
+;@Ahk2Exe-SetMainIcon AH.ico
 
 ; ====================================================================
 ; AHK Context Menu Decompiler
