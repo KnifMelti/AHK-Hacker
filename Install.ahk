@@ -65,7 +65,7 @@ installerPath := scriptDir . "\Install-ContextMenu.ahk"
 
 if (FileExist(installerPath)) {
     ; Path is from A_ScriptDir (trusted system variable), properly quoted for spaces
-    RunWait('"' . installerPath . '"')
+    RunWait('"' . installerPath . '" /silent')
     ShowProgress("Context menu installed!", 0, "AHK-Hacker Installation")
 } else {
     ; Install-ContextMenu.ahk is required - fatal error if missing

@@ -66,6 +66,7 @@ Registry scripts that add/remove context menu entry at:
 HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker
 ```
 No admin rights required.
+Supports `/silent` parameter to run without message boxes (uses TrayTip notifications instead).
 
 ### lib/Notifications.ahk
 Shared notification library that provides:
