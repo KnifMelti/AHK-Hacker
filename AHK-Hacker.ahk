@@ -9,7 +9,7 @@
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
-; Icon is embedded during compilation from res/ folder (not needed by end users)
+; Icon path: res/RH.ico (source) or RH.ico (release packages) - change path if compiling from release
 ;@Ahk2Exe-SetMainIcon res/RH.ico
 
 ; ====================================================================
