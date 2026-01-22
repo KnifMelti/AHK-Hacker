@@ -17,6 +17,7 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 - **Works anywhere** - Decompile files from any location
 - **No admin rights needed** - Uses HKEY_CURRENT_USER registry
 - **Auto-update Resource Hacker** - Built-in updater script
+- **Automatic UPX unpacking** - Detects and unpacks UPX-compressed executables
 
 ---
 
@@ -91,10 +92,12 @@ AHK-Hacker\
 │   ├── Notifications.ahk     (Shared notification library)
 │   ├── Install-ContextMenu.ahk   (Installs right-click menu)
 │   ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
-│   └── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
+│   ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
+│   └── Unpack-Exe.ahk        (UPX unpacker for packed executables)
 └── bin\                      (ResourceHacker executables - git-ignored)
     ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
     ├── ResourceHacker4.exe   (Bundled legacy version - v4.x)
+    ├── upx.exe               (Downloaded on-demand for unpacking)
     ├── .rh_version           (Version cache)
     ├── Help\                 (Resource Hacker documentation)
     └── samples\              (Resource Hacker samples)
@@ -138,9 +141,11 @@ If you prefer to uninstall manually:
 
 **Possible causes:**
 - The file is not an AutoHotkey compiled executable
-- The executable is protected/encrypted
+- The executable is protected/encrypted (e.g., Themida, Enigma)
 - The executable is corrupted
 - Not enough disk space
+
+**Note:** UPX-packed executables are automatically detected and unpacked. If you see this error with a UPX-packed file, check the decompilation log for details.
 
 ### Context menu doesn't appear
 

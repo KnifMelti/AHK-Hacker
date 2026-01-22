@@ -27,7 +27,8 @@ AHK-Hacker\
 │   ├── Notifications.ahk     (Shared notification library)
 │   ├── Install-ContextMenu.ahk   (Installs right-click menu)
 │   ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
-│   └── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
+│   ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
+│   └── Unpack-Exe.ahk        (UPX unpacker for packed executables)
 ├── res\                      (Development resources - synced to GitHub)
 │   ├── ResourceHacker4.exe   (Bundled legacy version - v4.x, copied to bin/ in releases)
 │   ├── RH.ico                (Resource Hacker icon - used for compilation)
@@ -37,6 +38,7 @@ AHK-Hacker\
 └── bin\                      (Runtime binaries - git-ignored)
     ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
     ├── ResourceHacker4.exe   (Copied from res/ during installation/release)
+    ├── upx.exe               (Downloaded on-demand for unpacking)
     ├── .rh_version           (Version cache)
     ├── Help\                 (Resource Hacker documentation)
     └── samples\              (Resource Hacker samples)
@@ -49,9 +51,11 @@ Main decompiler that:
 1. Receives .exe path from context menu argument
 2. Runs ResourceHacker 5.x to extract RCDATA resource
 3. Falls back to ResourceHacker 4.x if extraction fails (handles older AHK formats like `>AHK WITH ICON<`)
-4. Handles both old (`RCData.bin`) and new (`RCDATA1_1.bin`) output formats
-5. Converts line endings to Windows CRLF
-6. Outputs `filename_decompiled.ahk` in same folder as source
+4. Validates extracted content - if empty or too small (< 10 bytes), attempts UPX unpacking via lib/Unpack-Exe.ahk
+5. Handles both old (`RCData.bin`) and new (`RCDATA1_1.bin`) output formats
+6. Converts line endings to Windows CRLF
+7. Outputs `filename_decompiled.ahk` in same folder as source
+8. Cleans up temporary unpacked files (`*.unpacked.*.tmp`)
 
 ### Install.ahk
 Installation script that:
@@ -65,7 +69,7 @@ Installation script that:
 Uninstallation script that:
 1. Shows OK/Cancel dialog before starting uninstallation
 2. Runs lib/Uninstall-ContextMenu.ahk in silent mode to remove context menu
-3. Cleans up downloaded files from bin/ (ResourceHacker.exe, Help/, samples/, .rh_version, etc.)
+3. Cleans up downloaded files from bin/ (ResourceHacker.exe, upx.exe, Help/, samples/, .rh_version, etc.)
 4. Keeps ResourceHacker4.exe in bin/ (bundled version - originally from res/ in source)
 5. Shows progress notifications via ShowProgress from lib/Notifications.ahk
 
@@ -90,6 +94,28 @@ Looks for AHK-Hacker.exe in parent directory (since script is in lib/ folder).
 Registry script that removes context menu entry.
 No admin rights required.
 Supports `/silent` parameter to run without message boxes (uses ShowProgress notifications instead).
+
+### lib/Unpack-Exe.ahk
+Unpacker library that automatically handles UPX-compressed executables:
+- **TryUnpackExe(exePath, logFile)** - Main entry point that attempts UPX unpacking
+- **FindUpx()** - Searches for upx.exe in known locations (AutoHotkey\Compiler, bin/)
+- **DownloadUpx(logFile)** - Downloads latest UPX from GitHub releases API
+- Downloads ZIP, extracts upx.exe using PowerShell, unblocks file
+- Validates unpacked files are valid PE executables (MZ header check)
+- Creates temporary files with naming: `{filename}.unpacked.{timestamp}.tmp`
+- Logs all operations to the decompilation log file
+
+**UPX search order:**
+1. `%ProgramFiles%\AutoHotkey\Compiler\upx.exe`
+2. `bin/upx.exe` (downloaded/cached)
+
+**Unpacking workflow:**
+1. Called when ResourceHacker extracts empty/invalid RCDATA (< 10 bytes)
+2. Runs `upx -d input.exe -o output.tmp`
+3. Validates output is valid PE file (starts with "MZ")
+4. Returns path to unpacked temp file on success, "" on failure
+5. AHK-Hacker.ahk retries ResourceHacker on unpacked file
+6. Temporary file is cleaned up after decompilation
 
 ### lib/Notifications.ahk
 Shared notification library that provides:
