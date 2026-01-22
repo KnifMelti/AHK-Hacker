@@ -10,6 +10,9 @@
 ;        unpackedPath := TryUnpackExe(exePath, logFile)
 ; ====================================================================
 
+; Global silent mode flag (set by parent script)
+global SilentMode := false
+
 /**
  * TryUnpackExe - Attempts to unpack a UPX-compressed executable
  * @param exePath - Path to the packed executable
@@ -46,8 +49,8 @@ TryUnpackExe(exePath, logFile) {
     ; Run UPX unpacker
     ShowProgress("Unpacking with UPX...", 1, "AHK-Hacker")
 
-    ; UPX syntax: upx -d input.exe -o output.exe
-    cmd := '"' . upxPath . '" -d "' . exePath . '" -o "' . unpackedPath . '"'
+    ; UPX syntax: upx -d -o output.exe input.exe
+    cmd := '"' . upxPath . '" -d -o "' . unpackedPath . '" "' . exePath . '"'    
 
     FileAppend("Running UPX: " . cmd . "`n", logFile, "UTF-8-RAW")
 
@@ -149,18 +152,22 @@ DownloadUpx(logFile) {
 
         jsonResponse := whr.ResponseText
 
-        ; Parse tag_name (format: "v4.2.2")
-        if (RegExMatch(jsonResponse, '"tag_name"\s*:\s*"v([0-9.]+)"', &match)) {
-            version := match[1]
+        ; Parse browser_download_url for win64 zip
+        if (RegExMatch(jsonResponse, '"browser_download_url"\s*:\s*"([^"]*win64\.zip)"', &match)) {
+            zipUrl := match[1]
         } else {
-            FileAppend("Failed to parse UPX version from GitHub API`n", logFile, "UTF-8-RAW")
+            FileAppend("Failed to find win64.zip download URL from GitHub API`n", logFile, "UTF-8-RAW")
             return ""
         }
 
-        FileAppend("Downloading UPX v" . version . "...`n", logFile, "UTF-8-RAW")
+        ; Extract version from URL for logging (optional)
+        if (RegExMatch(zipUrl, "upx-([0-9.]+)-win64", &verMatch)) {
+            version := verMatch[1]
+            FileAppend("Downloading UPX v" . version . "...`n", logFile, "UTF-8-RAW")
+        } else {
+            FileAppend("Downloading UPX...`n", logFile, "UTF-8-RAW")
+        }
 
-        ; Build download URL
-        zipUrl := "https://github.com/upx/upx/releases/download/v" . version . "/upx-" . version . "-win64.zip"
         tempZip := binDir . "\upx_temp.zip"
 
         ; Download ZIP
@@ -181,11 +188,19 @@ DownloadUpx(logFile) {
         RunWait(psExtract, , "Hide")
         Sleep(500)
 
-        ; Find upx.exe in extracted folder (usually in upx-{version}-win64/upx.exe)
+        ; Log extracted contents for debugging
+        FileAppend("Extracted contents:`n", logFile, "UTF-8-RAW")
+        Loop Files, tempExtract . "\*", "DR" {
+            FileAppend("  " . A_LoopFileFullPath . "`n", logFile, "UTF-8-RAW")
+        }
+
+        ; Find upx.exe recursively
         upxExePath := ""
-        Loop Files, tempExtract . "\*\upx.exe", "R" {
-            upxExePath := A_LoopFileFullPath
-            break
+        Loop Files, tempExtract . "\*", "FR" {
+            if (A_LoopFileName = "upx.exe") {
+                upxExePath := A_LoopFileFullPath
+                break
+            }
         }
 
         if (upxExePath = "") {

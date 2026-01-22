@@ -5,7 +5,7 @@
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.2.0.0
+;@Ahk2Exe-Set FileVersion, 3.2.1.0
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -25,6 +25,17 @@
 if (A_Args.Length = 0) {
     MsgBox("No file specified!`n`nUsage: Drag .exe file or use from context menu.", "Error", 16)
     ExitApp(1)
+}
+
+; Check for silent mode parameter
+global SilentMode := false
+if (A_Args.Length > 1) {
+    Loop A_Args.Length {
+        if (A_Args[A_Index] = "/silent" || A_Args[A_Index] = "-silent") {
+            SilentMode := true
+            break
+        }
+    }
 }
 
 exePath := A_Args[1]
@@ -479,12 +490,9 @@ Loop Files "*.unpacked.*.tmp"
     try FileDelete(A_LoopFileFullPath)
 
 ; ====================================================================
-; STEP 6: SUCCESS NOTIFICATION
+; STEP 6: SUCCESS
 ; ====================================================================
 
-; Show success message
-ShowProgress(outputName . ".ahk", 0, "AHK-Hacker Decompiled")
-
-; Wait a bit so the notification has time to show
-Sleep(2000)
+; Show brief success notification
+ShowProgress("Decompiled: " . outputName . ".ahk", 0, "AHK-Hacker")
 ExitApp(0)
