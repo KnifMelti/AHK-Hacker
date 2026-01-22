@@ -179,8 +179,10 @@ HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker
 ### Supported AutoHotkey Versions
 
 Works with compiled scripts from:
-- AutoHotkey v1.0.x (uses Resource Hacker 4.x fallback)
-- AutoHotkey v1.1.x
+- AutoHotkey <= v1.0.48.5 (no, didn't save the script as text in exe) 
+- AutoHotkey < v1.1.30.0 (haven't tested)
+- AutoHotkey v1.1.30.0 (uses Resource Hacker 4.x fallback)
+- AutoHotkey v1.1.37.2
 - AutoHotkey v2.x
 
 ---
@@ -191,3 +193,4 @@ Works with compiled scripts from:
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
 - **AutoHotkey - Powerful. Easy to learn.** [The ultimate automation scripting language for Windows.](https://www.autohotkey.com/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
+
