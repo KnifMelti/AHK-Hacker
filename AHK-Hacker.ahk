@@ -5,7 +5,7 @@
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.1.0.2
+;@Ahk2Exe-Set FileVersion, 3.2.0.0
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -169,9 +169,106 @@ if (!binFound && FileExist(resourceHacker4Path)) {
 
 ; Check that extraction succeeded
 if (!binFound) {
-    ShowProgress("Not an AutoHotkey executable or packed/protected: " . fileName, 3, "AHK-Hacker Error")
-    try FileDelete("RCData.rc")
-    ExitApp(1)
+    ; STEP 3.5: TRY UNPACKING (if packed with mpress/upx)
+    #Include lib/Unpack-Exe.ahk
+
+    unpackedPath := TryUnpackExe(exePath, logFile)
+
+    if (unpackedPath != "") {
+        ; Unpacking succeeded - retry decompilation on unpacked exe
+
+        ; Save unpacking log content before ResourceHacker overwrites it
+        unpackingLog := ""
+        if (FileExist(logFile)) {
+            try {
+                unpackingLog := FileRead(logFile, "UTF-8-RAW")
+            }
+        }
+
+        ; Try ResourceHacker 5.x on unpacked file
+        if (FileExist(resourceHackerPath)) {
+            cmd := '"' . resourceHackerPath . '" -open "' . unpackedPath . '" -save RCData.rc -action extract -mask RCDATA,, -log "' . logFile . '"'
+            RunWait(cmd, , "Hide")
+            Sleep(100)
+
+            ; Convert log file from UTF-16 LE to UTF-8 and restore unpacking log
+            if (FileExist(logFile)) {
+                try {
+                    fileObj := FileOpen(logFile, "r", "UTF-16")
+                    logContent := fileObj.Read()
+                    fileObj.Close()
+                    if (logContent != "") {
+                        FileDelete(logFile)
+                        ; Restore unpacking log first, then ResourceHacker log
+                        if (unpackingLog != "") {
+                            FileAppend(unpackingLog, logFile, "UTF-8-RAW")
+                        }
+                        FileAppend(logContent, logFile, "UTF-8-RAW")
+                        logContent := ""
+                    }
+                }
+            }
+
+            ; Check if extraction succeeded
+            Loop Files "RCDATA*.bin" {
+                binFound := true
+                break
+            }
+            if (!binFound && FileExist("RCData.bin"))
+                binFound := true
+        }
+
+        ; Try ResourceHacker 4.x if 5.x failed
+        if (!binFound && FileExist(resourceHacker4Path)) {
+            ; Save current log content (includes unpacking info + possibly RH5 output)
+            currentLog := ""
+            if (FileExist(logFile)) {
+                try {
+                    currentLog := FileRead(logFile, "UTF-8-RAW")
+                }
+            }
+
+            try FileDelete("RCData.rc")
+            cmd := '"' . resourceHacker4Path . '" -open "' . unpackedPath . '" -save RCData.rc -action extract -mask RCDATA,, -log "' . logFile . '"'
+            RunWait(cmd, , "Hide")
+            Sleep(100)
+
+            ; Convert log file from UTF-16 LE to UTF-8 and restore previous log
+            if (FileExist(logFile)) {
+                try {
+                    fileObj := FileOpen(logFile, "r", "UTF-16")
+                    logContent := fileObj.Read()
+                    fileObj.Close()
+                    if (logContent != "") {
+                        FileDelete(logFile)
+                        ; Restore previous log first, then ResourceHacker 4 log
+                        if (currentLog != "") {
+                            FileAppend(currentLog, logFile, "UTF-8-RAW")
+                        }
+                        FileAppend(logContent, logFile, "UTF-8-RAW")
+                        logContent := ""
+                    }
+                }
+            }
+
+            Loop Files "RCDATA*.bin" {
+                binFound := true
+                break
+            }
+            if (!binFound && FileExist("RCData.bin"))
+                binFound := true
+        }
+
+        ; Clean up unpacked temporary file
+        try FileDelete(unpackedPath)
+    }
+
+    ; Final check - if still no .bin found, show error
+    if (!binFound) {
+        ShowProgress("Not an AutoHotkey executable or packed/protected: " . fileName, 3, "AHK-Hacker Error")
+        try FileDelete("RCData.rc")
+        ExitApp(1)
+    }
 }
 
 ; ====================================================================
@@ -212,6 +309,139 @@ try {
     ExitApp(1)
 }
 
+; Check if content is empty or too small (likely packed/corrupted)
+; Valid AHK scripts are typically at least 10 bytes
+if (StrLen(scriptContent) < 10) {
+    ; Content is too small - file might be packed
+    ; Clean up current .bin file
+    try FileDelete(binFile)
+    try FileDelete("RCData.rc")
+
+    ; Try unpacking
+    #Include lib/Unpack-Exe.ahk
+
+    unpackedPath := TryUnpackExe(exePath, logFile)
+
+    if (unpackedPath != "") {
+        ; Unpacking succeeded - retry extraction on unpacked exe
+
+        ; Save unpacking log before ResourceHacker overwrites it
+        unpackingLog := ""
+        if (FileExist(logFile)) {
+            try {
+                unpackingLog := FileRead(logFile, "UTF-8-RAW")
+            }
+        }
+
+        ; Try ResourceHacker 5.x on unpacked file
+        binFound := false
+        if (FileExist(resourceHackerPath)) {
+            cmd := '"' . resourceHackerPath . '" -open "' . unpackedPath . '" -save RCData.rc -action extract -mask RCDATA,, -log "' . logFile . '"'
+            RunWait(cmd, , "Hide")
+            Sleep(100)
+
+            ; Convert log file from UTF-16 LE to UTF-8 and restore unpacking log
+            if (FileExist(logFile)) {
+                try {
+                    fileObj := FileOpen(logFile, "r", "UTF-16")
+                    logContent := fileObj.Read()
+                    fileObj.Close()
+                    if (logContent != "") {
+                        FileDelete(logFile)
+                        if (unpackingLog != "") {
+                            FileAppend(unpackingLog, logFile, "UTF-8-RAW")
+                        }
+                        FileAppend(logContent, logFile, "UTF-8-RAW")
+                        logContent := ""
+                    }
+                }
+            }
+
+            ; Check if extraction succeeded
+            Loop Files "RCDATA*.bin" {
+                binFound := true
+                binFile := A_LoopFileName
+                break
+            }
+            if (!binFound && FileExist("RCData.bin")) {
+                binFound := true
+                binFile := "RCData.bin"
+            }
+        }
+
+        ; Try ResourceHacker 4.x if 5.x failed
+        if (!binFound && FileExist(resourceHacker4Path)) {
+            currentLog := ""
+            if (FileExist(logFile)) {
+                try {
+                    currentLog := FileRead(logFile, "UTF-8-RAW")
+                }
+            }
+
+            try FileDelete("RCData.rc")
+            cmd := '"' . resourceHacker4Path . '" -open "' . unpackedPath . '" -save RCData.rc -action extract -mask RCDATA,, -log "' . logFile . '"'
+            RunWait(cmd, , "Hide")
+            Sleep(100)
+
+            ; Convert log file from UTF-16 LE to UTF-8 and restore previous log
+            if (FileExist(logFile)) {
+                try {
+                    fileObj := FileOpen(logFile, "r", "UTF-16")
+                    logContent := fileObj.Read()
+                    fileObj.Close()
+                    if (logContent != "") {
+                        FileDelete(logFile)
+                        if (currentLog != "") {
+                            FileAppend(currentLog, logFile, "UTF-8-RAW")
+                        }
+                        FileAppend(logContent, logFile, "UTF-8-RAW")
+                        logContent := ""
+                    }
+                }
+            }
+
+            Loop Files "RCDATA*.bin" {
+                binFound := true
+                binFile := A_LoopFileName
+                break
+            }
+            if (!binFound && FileExist("RCData.bin")) {
+                binFound := true
+                binFile := "RCData.bin"
+            }
+        }
+
+        ; Clean up unpacked temporary file
+        try FileDelete(unpackedPath)
+
+        ; Check if we got a valid .bin file after unpacking
+        if (!binFound || binFile = "") {
+            ShowProgress("Failed to extract script data after unpacking!`n`nThis file may not be an AutoHotkey executable.", 3, "AHK-Hacker Error")
+            ExitApp(1)
+        }
+
+        ; Read the new .bin file
+        try {
+            scriptContent := FileRead(binFile)
+        } catch Error as err {
+            ShowProgress("Failed to read script data after unpacking!", 3, "AHK-Hacker Error")
+            try FileDelete(binFile)
+            ExitApp(1)
+        }
+
+        ; Check again if content is valid
+        if (StrLen(scriptContent) < 10) {
+            ShowProgress("Extracted script is empty or corrupted!`n`nThis file may be encrypted or protected.", 3, "AHK-Hacker Error")
+            try FileDelete(binFile)
+            ExitApp(1)
+        }
+    } else {
+        ; Unpacking failed
+        ShowProgress("Script data is empty and unpacking failed!`n`nThis file may be encrypted or protected.", 3, "AHK-Hacker Error")
+        ExitApp(1)
+    }
+}
+
 ; Convert Unix LF to Windows CRLF
 scriptContent := StrReplace(scriptContent, "`r`n", "`n")  ; Normalize to LF first
 scriptContent := StrReplace(scriptContent, "`n", "`r`n")  ; Convert to CRLF
@@ -242,6 +472,10 @@ try FileDelete(binFile)
 Loop Files "*.rc"
     try FileDelete(A_LoopFileFullPath)
 Loop Files "RCDATA*.bin"
+    try FileDelete(A_LoopFileFullPath)
+
+; Remove unpacked temp files (if any remain)
+Loop Files "*.unpacked.*.tmp"
     try FileDelete(A_LoopFileFullPath)
 
 ; ====================================================================

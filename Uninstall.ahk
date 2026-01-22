@@ -59,6 +59,13 @@ if (FileExist(binDir)) {
     ; Delete Help and samples folders if they exist
     try DirDelete(binDir . "\Help", true)
     try DirDelete(binDir . "\samples", true)
+
+    ; Delete downloaded UPX unpacker
+    try FileDelete(binDir . "\upx.exe")
+
+    ; Clean up any leftover UPX temp files
+    try FileDelete(binDir . "\upx_temp.zip")
+    try DirDelete(binDir . "\upx_temp_extract", true)
 }
 
 ; ====================================================================
