@@ -126,7 +126,7 @@ This will automatically:
 
 If you prefer to uninstall manually:
 1. Run `lib\Uninstall-ContextMenu.ahk` to remove the context menu
-2. Manually delete the ` [AHK-Hacker folder]` folder if desired
+2. Manually delete the `[AHK-Hacker folder]` folder if desired
 
 ---
 
@@ -196,6 +196,7 @@ Works with compiled scripts from:
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
