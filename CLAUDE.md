@@ -29,7 +29,7 @@ AHK-Hacker\
 │   ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
 │   ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
 │   ├── Unpack-Exe.ahk            (Downloads UPX unpacker for packed executables)
-│   └── Launch-MyAutToExe.ahk     (Optional download/launch of myAutToExe GUI for automatic old AHK decompilation)
+│   └── Launch-MyAutToExe.ahk     (Optional download of mATE for old AHK decompilation)
 ├── res\                          (Development resources - synced to GitHub)
 │   ├── ResourceHacker4.exe       (Bundled legacy version - v4.x, copied to bin/ in releases)
 │   ├── RH.ico                    (Resource Hacker icon - used for compilation)
@@ -186,5 +186,6 @@ The `res/` folder contains development-time resources that are tracked in Git:
 - **sign_exe.ps1**: PowerShell script for code signing with digital certificate
 
 These files are NOT distributed directly in the res/ folder. During release, ResourceHacker4.exe is copied to the bin/ folder in release packages, and RH.ico is included in the root for visibility.
+
 
 
