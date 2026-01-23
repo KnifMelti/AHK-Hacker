@@ -5,7 +5,7 @@
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.2.2.1
+;@Ahk2Exe-Set FileVersion, 3.2.2.2
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -118,18 +118,20 @@ if (!FileExist(resourceHackerPath) && !FileExist(resourceHacker4Path)) {
 
 ; Try ResourceHacker 5.x first (if available)
 binFound := false
+rh5Log := ""  ; Save RH5 log content for later
 if (FileExist(resourceHackerPath)) {
     cmd := '"' . resourceHackerPath . '" -open "' . exePath . '" -save RCData.rc -action extract -mask RCDATA,, -log "' . logFile . '"'
     RunWait(cmd, , "Hide")
     Sleep(100)
 
-    ; Convert log file from UTF-16 LE to UTF-8
+    ; Convert log file from UTF-16 LE to UTF-8 and save content
     if (FileExist(logFile)) {
         try {
             fileObj := FileOpen(logFile, "r", "UTF-16")
             logContent := fileObj.Read()
             fileObj.Close()
             if (logContent != "") {
+                rh5Log := logContent  ; Save RH5 log
                 FileDelete(logFile)
                 FileAppend(logContent, logFile, "UTF-8-RAW")
                 logContent := ""
@@ -154,7 +156,7 @@ if (!binFound && FileExist(resourceHacker4Path)) {
     RunWait(cmd, , "Hide")
     Sleep(100)
 
-    ; Convert log file from UTF-16 LE to UTF-8
+    ; Convert log file from UTF-16 LE to UTF-8 and restore RH5 log
     if (FileExist(logFile)) {
         try {
             fileObj := FileOpen(logFile, "r", "UTF-16")
@@ -162,6 +164,10 @@ if (!binFound && FileExist(resourceHacker4Path)) {
             fileObj.Close()
             if (logContent != "") {
                 FileDelete(logFile)
+                ; Restore RH5 log first, then append RH4 log
+                if (rh5Log != "") {
+                    FileAppend(rh5Log, logFile, "UTF-8-RAW")
+                }
                 FileAppend(logContent, logFile, "UTF-8-RAW")
                 logContent := ""
             }
