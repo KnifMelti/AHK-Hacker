@@ -16,33 +16,33 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 
 ```
 AHK-Hacker\
-├── AHK-Hacker.ahk            (Main decompiler script)
-├── AHK-Hacker.exe            (Compiled and signed executable)
-├── Install.ahk               (Installer - unblocks files, prompts OK/Cancel)
-├── Uninstall.ahk             (Uninstaller - removes context menu, cleans bin/)
-├── README.md                 (User documentation)
-├── CLAUDE.md                 (This file - developer documentation)
-├── log\                      (Decompilation logs)
-├── lib\                      (Shared libraries - synced to GitHub)
-│   ├── Notifications.ahk     (Shared notification library)
+├── AHK-Hacker.ahk                (Main decompiler script)
+├── AHK-Hacker.exe                (Compiled and signed executable)
+├── Install.ahk                   (Installer - unblocks files etc...)
+├── Uninstall.ahk                 (Uninstaller - removes context menu etc...)
+├── README.md                     (User documentation)
+├── CLAUDE.md                     (This file - developer documentation)
+├── log\                          (Decompilation logs)
+├── lib\                          (Shared libraries - synced to GitHub)
+│   ├── Notifications.ahk         (Notification library)
 │   ├── Install-ContextMenu.ahk   (Installs right-click menu)
 │   ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
 │   ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
-│   ├── Unpack-Exe.ahk        (UPX unpacker for packed executables)
-│   └── Launch-MyAutToExe.ahk (Opens myAutToExe GUI for manual decompilation of old AHK)
-├── res\                      (Development resources - synced to GitHub)
-│   ├── ResourceHacker4.exe   (Bundled legacy version - v4.x, copied to bin/ in releases)
-│   ├── RH.ico                (Resource Hacker icon - used for compilation)
-│   ├── icon.png              (Project icon for README)
-│   ├── compile_and_sign.ps1  (Build script for development)
-│   └── sign_exe.ps1          (Code signing script)
-└── bin\                      (Runtime binaries - git-ignored)
-    ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
-    ├── ResourceHacker4.exe   (Copied from res/ during installation/release)
-    ├── upx.exe               (Downloaded on-demand for unpacking)
-    ├── .rh_version           (Version cache)
-    ├── Help\                 (Resource Hacker documentation)
-    └── samples\              (Resource Hacker samples)
+│   ├── Unpack-Exe.ahk            (Downloads UPX unpacker for packed executables)
+│   └── Launch-MyAutToExe.ahk     (Optional download/launch of myAutToExe GUI for automatic old AHK decompilation)
+├── res\                          (Development resources - synced to GitHub)
+│   ├── ResourceHacker4.exe       (Bundled legacy version - v4.x, copied to bin/ in releases)
+│   ├── RH.ico                    (Resource Hacker icon - used for compilation)
+│   ├── icon.png                  (Project icon for README)
+│   ├── compile_and_sign.ps1      (Build script for development)
+│   └── sign_exe.ps1              (Code signing script)
+└── bin\                          (Runtime binaries - git-ignored)
+    ├── ResourceHacker.exe        (Downloaded automatically - v5.x)
+    ├── ResourceHacker4.exe       (Bundled and copied from res/ during installation/release)
+    ├── upx.exe                   (Downloaded on-demand for unpacking)
+    ├── .rh_version               (Version cache)
+    ├── Help\                     (Resource Hacker documentation)
+    └── samples\                  (Resource Hacker samples)
 ```
 
 ## Key Components
@@ -187,4 +187,5 @@ The `res/` folder contains development-time resources that are tracked in Git:
 - **sign_exe.ps1**: PowerShell script for code signing with digital certificate
 
 These files are NOT distributed directly in the res/ folder. During release, ResourceHacker4.exe is copied to the bin/ folder in release packages, and RH.ico is included in the root for visibility.
+
 
