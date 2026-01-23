@@ -81,27 +81,27 @@ The script uses HTTP HEAD requests to check for updates without downloading the 
 
 ```
 AHK-Hacker\
-├── AHK-Hacker.ahk            (Main decompiler script)
-├── AHK-Hacker.exe            (Compiled and signed executable)
-├── Install.ahk               (Installer - unblocks files, prompts OK/Cancel)
-├── Uninstall.ahk             (Uninstaller - removes context menu, cleans bin/)
-├── RH.ico                    (Resource Hacker icon)
-├── README.md                 (You're reading it...)
-├── log\                      (Decompilation logs)
-├── lib\                      (Shared libraries - synced to GitHub)
-│   ├── Notifications.ahk     (Shared notification library)
+├── AHK-Hacker.ahk                (Main decompiler script)
+├── AHK-Hacker.exe                (Compiled and signed executable)
+├── Install.ahk                   (Installer - unblocks files etc...)
+├── Uninstall.ahk                 (Uninstaller - removes context menu etc...)
+├── RH.ico                        (Resource Hacker icon)
+├── README.md                     (You're reading it...)
+├── log\                          (Decompilation logs)
+├── lib\                          (Shared libraries)
+│   ├── Notifications.ahk         (Notification library)
 │   ├── Install-ContextMenu.ahk   (Installs right-click menu)
 │   ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
 │   ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
-│   ├── Unpack-Exe.ahk        (UPX unpacker for packed executables)
-│   └── Launch-MyAutToExe.ahk (Launches myAutToExe GUI for automatic decompilation of old AHK)
-└── bin\                      (ResourceHacker executables - git-ignored)
-    ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
-    ├── ResourceHacker4.exe   (Bundled legacy version - v4.x)
-    ├── upx.exe               (Downloaded on-demand for unpacking)
-    ├── .rh_version           (Version cache)
-    ├── Help\                 (Resource Hacker documentation)
-    └── samples\              (Resource Hacker samples)
+│   ├── Unpack-Exe.ahk            (Downloads UPX unpacker for packed executables)
+│   └── Launch-MyAutToExe.ahk     (Optional download/launch of myAutToExe GUI for automatic old AHK decompilation)
+└── bin\                          (Runtime binaries)
+    ├── ResourceHacker.exe        (Downloaded automatically - v5.x)
+    ├── ResourceHacker4.exe       (Bundled legacy version - v4.x)
+    ├── upx.exe                   (Downloaded on-demand for unpacking)
+    ├── .rh_version               (Version cache)
+    ├── Help\                     (Resource Hacker documentation)
+    └── samples\                  (Resource Hacker samples)
 ```
 
 ---
@@ -181,8 +181,7 @@ HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker
 
 Works with compiled scripts from:
 - AutoHotkey <= v1.0.48.5 (myAutToExe decompiler used automatically as fallback)
-- AutoHotkey < v1.1.30.0 (haven't tested)
-- AutoHotkey v1.1.30.0 (uses Resource Hacker 4.x fallback)
+- AutoHotkey <= v1.1.30.0 (uses Resource Hacker 4.x fallback)
 - AutoHotkey v1.1.37.2
 - AutoHotkey v2.x
 
@@ -195,4 +194,5 @@ Works with compiled scripts from:
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
