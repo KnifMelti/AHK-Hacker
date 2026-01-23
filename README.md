@@ -94,7 +94,7 @@ AHK-Hacker\
 │   ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
 │   ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
 │   ├── Unpack-Exe.ahk        (UPX unpacker for packed executables)
-│   └── Launch-MyAutToExe.ahk (Opens myAutToExe GUI for manual decompilation of old AHK)
+│   └── Launch-MyAutToExe.ahk (Launches myAutToExe GUI for automatic decompilation of old AHK)
 └── bin\                      (ResourceHacker executables - git-ignored)
     ├── ResourceHacker.exe    (Downloaded automatically - v5.x)
     ├── ResourceHacker4.exe   (Bundled legacy version - v4.x)
@@ -194,6 +194,4 @@ Works with compiled scripts from:
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
 - **AutoHotkey - Powerful. Easy to learn.** [The ultimate automation scripting language for Windows.](https://www.autohotkey.com/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
-
-
-
+- **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
