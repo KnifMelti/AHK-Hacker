@@ -179,7 +179,7 @@ HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker
 ### Supported AutoHotkey Versions
 
 Works with compiled scripts from:
-- AutoHotkey <= v1.0.48.5 (no, didn't save the script as text in exe - use [myAutToExe (AutoIt decompiler)](https://github.com/daovantrong/myAutToExe)) 
+- AutoHotkey <= v1.0.48.5 (myAutToExe decompiler used automatically as fallback)
 - AutoHotkey < v1.1.30.0 (haven't tested)
 - AutoHotkey v1.1.30.0 (uses Resource Hacker 4.x fallback)
 - AutoHotkey v1.1.37.2

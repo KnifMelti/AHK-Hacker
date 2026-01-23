@@ -5,7 +5,7 @@
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.2.1.0
+;@Ahk2Exe-Set FileVersion, 3.2.2.0
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -274,10 +274,13 @@ if (!binFound) {
         try FileDelete(unpackedPath)
     }
 
-    ; Final check - if still no .bin found, show error
+    ; Final check - if still no .bin found, offer myAutToExe
     if (!binFound) {
-        ShowProgress("Not an AutoHotkey executable or packed/protected: " . fileName, 3, "AHK-Hacker Error")
         try FileDelete("RCData.rc")
+
+        ; Offer myAutToExe for very old AHK executables
+        #Include lib/Launch-MyAutToExe.ahk
+        OfferMyAutToExe(exePath)
         ExitApp(1)
     }
 }
@@ -427,7 +430,11 @@ if (StrLen(scriptContent) < 10) {
 
         ; Check if we got a valid .bin file after unpacking
         if (!binFound || binFile = "") {
-            ShowProgress("Failed to extract script data after unpacking!`n`nThis file may not be an AutoHotkey executable.", 3, "AHK-Hacker Error")
+            try FileDelete("RCData.rc")
+
+            ; Offer myAutToExe for very old AHK executables
+            #Include lib/Launch-MyAutToExe.ahk
+            OfferMyAutToExe(exePath)
             ExitApp(1)
         }
 
@@ -442,13 +449,20 @@ if (StrLen(scriptContent) < 10) {
 
         ; Check again if content is valid
         if (StrLen(scriptContent) < 10) {
-            ShowProgress("Extracted script is empty or corrupted!`n`nThis file may be encrypted or protected.", 3, "AHK-Hacker Error")
             try FileDelete(binFile)
+            try FileDelete("RCData.rc")
+
+            ; Offer myAutToExe for very old AHK executables
+            #Include lib/Launch-MyAutToExe.ahk
+            OfferMyAutToExe(exePath)
             ExitApp(1)
         }
     } else {
-        ; Unpacking failed
-        ShowProgress("Script data is empty and unpacking failed!`n`nThis file may be encrypted or protected.", 3, "AHK-Hacker Error")
+        ; Unpacking failed - offer myAutToExe
+        try FileDelete("RCData.rc")
+
+        #Include lib/Launch-MyAutToExe.ahk
+        OfferMyAutToExe(exePath)
         ExitApp(1)
     }
 }

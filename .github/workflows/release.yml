@@ -50,6 +50,7 @@ jobs:
           cp lib/Uninstall-ContextMenu.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
           cp lib/Update-ResourceHacker.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
           cp lib/Unpack-Exe.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+          cp lib/Launch-MyAutToExe.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
 
           # bin/ folder - bundled ResourceHacker4.exe
           cp res/ResourceHacker4.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/bin/

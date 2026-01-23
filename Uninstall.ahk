@@ -72,5 +72,5 @@ if (FileExist(binDir)) {
 ; STEP 3: COMPLETION
 ; ====================================================================
 
-MsgBox("Uninstallation complete!`n`nContext menu removed and downloaded files cleaned up.`n`nNote: ResourceHacker4.exe (bundled version) and the AHK-Hacker folder are kept.`nYou can manually delete the folder if you want to remove everything.", "Success", 64)
+MsgBox("Uninstallation complete!`n`nContext menu removed and downloaded files cleaned up.`n`nNote: ResourceHacker4.exe (bundled version), log files, and the AHK-Hacker folder are kept.`nYou can manually delete the folder if you want to remove everything.", "Success", 64)
 ExitApp(0)

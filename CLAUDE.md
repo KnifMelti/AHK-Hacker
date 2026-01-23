@@ -28,7 +28,8 @@ AHK-Hacker\
 │   ├── Install-ContextMenu.ahk   (Installs right-click menu)
 │   ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
 │   ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
-│   └── Unpack-Exe.ahk        (UPX unpacker for packed executables)
+│   ├── Unpack-Exe.ahk        (UPX unpacker for packed executables)
+│   └── Launch-MyAutToExe.ahk (Opens myAutToExe GUI for manual decompilation of old AHK)
 ├── res\                      (Development resources - synced to GitHub)
 │   ├── ResourceHacker4.exe   (Bundled legacy version - v4.x, copied to bin/ in releases)
 │   ├── RH.ico                (Resource Hacker icon - used for compilation)
@@ -52,10 +53,12 @@ Main decompiler that:
 2. Runs ResourceHacker 5.x to extract RCDATA resource
 3. Falls back to ResourceHacker 4.x if extraction fails (handles older AHK formats like `>AHK WITH ICON<`)
 4. Validates extracted content - if empty or too small (< 10 bytes), attempts UPX unpacking via lib/Unpack-Exe.ahk
-5. Handles both old (`RCData.bin`) and new (`RCDATA1_1.bin`) output formats
-6. Converts line endings to Windows CRLF
-7. Outputs `filename_decompiled.ahk` in same folder as source
-8. Cleans up temporary unpacked files (`*.unpacked.*.tmp`)
+5. If UPX succeeds, retries ResourceHacker 5.x → 4.x on unpacked file
+6. If all methods fail, offers to open myAutToExe GUI for manual decompilation (very old AHK <= v1.0.48.5)
+7. Handles both old (`RCData.bin`) and new (`RCDATA1_1.bin`) output formats
+8. Converts line endings to Windows CRLF
+9. Outputs `filename_decompiled.ahk` in same folder as source
+10. Cleans up temporary unpacked files (`*.unpacked.*.tmp`)
 
 ### Install.ahk
 Installation script that:
@@ -116,6 +119,29 @@ Unpacker library that automatically handles UPX-compressed executables:
 4. Returns path to unpacked temp file on success, "" on failure
 5. AHK-Hacker.ahk retries ResourceHacker on unpacked file
 6. Temporary file is cleaned up after decompilation
+
+### lib/Launch-MyAutToExe.ahk
+Automatic decompilation fallback for very old AutoHotkey executables (v1.0.48.5 and earlier):
+- **OfferMyAutToExe(exePath)** - Shows dialog offering to try myAutToExe decompilation
+- **EnsureMyAutToExeInstalled()** - Checks if myAutToExe is installed to Desktop, downloads if needed
+- **DownloadMyAutToExe()** - Downloads and extracts latest myAutToExe from GitHub zipball_url to Desktop\myAutToExe\
+- Downloads ZIP from GitHub API using zipball_url (latest release source)
+- Extracts subdirectory (daovantrong-myAutToExe-*) to temp folder
+- Selectively copies Data/, Tidy/ folders and root files to Desktop\myAutToExe\
+- Unblocks all files recursively
+- Runs myAutToExe.exe with /q /s parameters (silent mode, quit when done)
+
+**Installation location:**
+- %USERPROFILE%\Desktop\myAutToExe\ (selective extraction: Data/, Tidy/, and root files only)
+
+**Workflow:**
+1. Called when all automatic methods fail (RH5 → RH4 → UPX)
+2. Shows Yes/No dialog asking if user wants to try myAutToExe
+3. If Yes: ensures myAutToExe is installed (downloads if needed, with progress notifications)
+4. Runs myAutToExe.exe in silent mode: `myAutToExe.exe "input.exe" /q /s`
+5. Waits for decompilation to complete
+6. Renames output from `filename.ahk` to `filename_decompiled.ahk`
+7. Shows success or failure message
 
 ### lib/Notifications.ahk
 Shared notification library that provides:

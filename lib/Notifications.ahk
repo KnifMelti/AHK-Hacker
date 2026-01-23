@@ -57,16 +57,22 @@ ShowToast(message, iconType := 1, duration := 1000) {
  *                   2 = Warning
  *                   3 = Error
  * @param title - Optional title (unused, kept for backward compatibility)
+ * @param customDuration - Optional custom duration in milliseconds (0 = use default)
  */
-ShowProgress(message, iconType := 1, title := "AHK-Hacker") {
+ShowProgress(message, iconType := 1, title := "AHK-Hacker", customDuration := 0) {
     ; Respect global SilentMode flag (if set by parent script)
     if (IsSet(SilentMode) && SilentMode)
         return
 
-    ; Use toast notification with duration based on type
+    ; Use custom duration if specified, otherwise use default based on type
     ; Errors (type 3) show longer (3000ms) so user can read them
     ; Info/warning/success show briefly (1000ms)
-    duration := (iconType = 3) ? 3000 : 1000
+    if (customDuration > 0) {
+        duration := customDuration
+    } else {
+        duration := (iconType = 3) ? 3000 : 1000
+    }
+
     ShowToast(message, iconType, duration)
 
     ; For errors and success, wait for the toast to be displayed before returning
