@@ -34,7 +34,7 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 
 This will automatically:
 - Unblock all files (removes Windows security warnings)
-- Download the latest ResourceHacker 5.x to `bin/` folder
+- Download the latest ResourceHacker 5.x to `bin\` folder
 - Install the context menu integration
 
 **Done!** No administrator privileges required.
@@ -44,7 +44,7 @@ This will automatically:
 If you prefer to install manually:
 1. Extract the zip file
 2. Unblock files if needed (right-click files → Properties → Unblock)
-3. Run `lib\Update-ResourceHacker.ahk` to download ResourceHacker 5.x to `bin/` folder
+3. Run `lib\Update-ResourceHacker.ahk` to download ResourceHacker 5.x to `bin\` folder
 4. Run `lib\Install-ContextMenu.ahk` to add the context menu
 
 ---
@@ -57,7 +57,7 @@ If you prefer to install manually:
 2. Select **"AHK-Hacker - Decompile"** from the context menu
 3. Wait a few seconds
 4. A notification will appear with the result
-5. The decompiled `.ahk` file will be in the **same folder** as the .exe
+5. The decompiled `.ahk` file will be in the **same folder** as the `.exe`
 
 ### Example
 
@@ -116,9 +116,9 @@ AHK-Hacker\
 
 This will automatically:
 - Remove the context menu integration
-- Delete downloaded ResourceHacker files from `bin/` folder
-- Delete downloaded mATE decompiler from `bin/mATE/` folder
-- Keep ResourceHacker4.exe (bundled version)
+- Delete downloaded ResourceHacker files from `bin\` folder
+- Delete downloaded mATE decompiler from `bin\mATE\` folder
+- Keep ResourceHacker4.exe (bundled version) under `bin\`
 
 **Note:** The AHK-Hacker folder itself is not deleted. You can manually delete it if you want to remove everything.
 
@@ -126,7 +126,7 @@ This will automatically:
 
 If you prefer to uninstall manually:
 1. Run `lib\Uninstall-ContextMenu.ahk` to remove the context menu
-2. Manually delete the `bin/` folder if desired
+2. Manually delete the ` [AHK-Hacker folder]` folder if desired
 
 ---
 
@@ -134,7 +134,7 @@ If you prefer to uninstall manually:
 
 ### "ResourceHacker.exe not found in bin folder"
 
-**Solution:** Run `lib\Update-ResourceHacker.ahk` to download it to the `bin/` folder.
+**Solution:** Run `lib\Update-ResourceHacker.ahk` to download it to the `bin\` folder.
 
 ### "Not an AutoHotkey executable"
 
@@ -196,6 +196,7 @@ Works with compiled scripts from:
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
