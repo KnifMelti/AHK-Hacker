@@ -5,7 +5,7 @@
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.2.2.4
+;@Ahk2Exe-Set FileVersion, 3.2.2.5
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -186,12 +186,31 @@ if (!binFound && FileExist(resourceHacker4Path)) {
 
 ; Check that extraction succeeded
 if (!binFound) {
-    ; STEP 3.5: TRY UNPACKING (if packed with mpress/upx)
+    ; STEP 3.5: CHECK UPX DETECTION BEFORE UNPACKING
     #Include lib/Unpack-Exe.ahk
 
-    unpackedPath := TryUnpackExe(exePath, logFile)
+    ; Check if file is UPX-packed before attempting unpacking
+    FileAppend("`n===== UPX DETECTION =====`n", logFile, "UTF-8-RAW")
+    upxDetected := IsUPXPacked(exePath, logFile)
 
-    if (unpackedPath != "") {
+    if (upxDetected = 1) {
+        ; UPX detected - proceed with unpacking
+        FileAppend("UPX detected - proceeding with unpacking`n", logFile, "UTF-8-RAW")
+        unpackedPath := TryUnpackExe(exePath, logFile)
+    } else if (upxDetected = 0) {
+        ; Not UPX-packed and no RCDATA found - file is likely not an AHK executable
+        FileAppend("Not UPX-packed - file is likely not an AutoHotkey executable`n", logFile, "UTF-8-RAW")
+        try FileDelete("RCData.rc")
+
+        MsgBox("Failed to extract script data!`n`nThis file may not be an AutoHotkey executable.", "AHK-Hacker Error", 16)
+        ExitApp(1)
+    } else {
+        ; Detection failed (-1) - try unpacking anyway as fallback
+        FileAppend("UPX detection inconclusive - attempting unpacking anyway`n", logFile, "UTF-8-RAW")
+        unpackedPath := TryUnpackExe(exePath, logFile)
+    }
+
+    if (upxDetected != 0 && unpackedPath != "") {
         ; Unpacking succeeded - retry decompilation on unpacked exe
 
         ; Save unpacking log content before ResourceHacker overwrites it
@@ -337,12 +356,31 @@ if (StrLen(scriptContent) < 10) {
     try FileDelete(binFile)
     try FileDelete("RCData.rc")
 
-    ; Try unpacking
+    ; Check UPX detection before unpacking
     #Include lib/Unpack-Exe.ahk
 
-    unpackedPath := TryUnpackExe(exePath, logFile)
+    ; Check if file is UPX-packed before attempting unpacking
+    FileAppend("`n===== UPX DETECTION (SMALL CONTENT) =====`n", logFile, "UTF-8-RAW")
+    upxDetected := IsUPXPacked(exePath, logFile)
 
-    if (unpackedPath != "") {
+    if (upxDetected = 1) {
+        ; UPX detected - proceed with unpacking
+        FileAppend("UPX detected - proceeding with unpacking`n", logFile, "UTF-8-RAW")
+        unpackedPath := TryUnpackExe(exePath, logFile)
+    } else if (upxDetected = 0) {
+        ; Not UPX-packed and no RCDATA found - file is likely not an AHK executable
+        FileAppend("Not UPX-packed - file is likely not an AutoHotkey executable`n", logFile, "UTF-8-RAW")
+        try FileDelete("RCData.rc")
+
+        MsgBox("Failed to extract script data!`n`nThis file may not be an AutoHotkey executable.", "AHK-Hacker Error", 16)
+        ExitApp(1)
+    } else {
+        ; Detection failed (-1) - try unpacking anyway as fallback
+        FileAppend("UPX detection inconclusive - attempting unpacking anyway`n", logFile, "UTF-8-RAW")
+        unpackedPath := TryUnpackExe(exePath, logFile)
+    }
+
+    if (upxDetected != 0 && unpackedPath != "") {
         ; Unpacking succeeded - retry extraction on unpacked exe
 
         ; Save unpacking log before ResourceHacker overwrites it
