@@ -42,10 +42,10 @@ This will automatically:
 ### Manual Install
 
 If you prefer to install manually:
-1. Extract the zip file
-2. Unblock files if needed (right-click files → Properties → Unblock)
-3. Run `lib\Update-ResourceHacker.ahk` to download ResourceHacker 5.x to `bin\` folder
-4. Run `lib\Install-ContextMenu.ahk` to add the context menu
+1. Unblock the downloaded `.zip` (right-click `.zip` → Properties → Unblock)
+2. Extract the zip file
+4. Run `lib\Update-ResourceHacker.ahk` to download ResourceHacker 5.x to `bin\` folder
+5. Run `lib\Install-ContextMenu.ahk` to add the context menu
 
 ---
 
@@ -196,6 +196,7 @@ Works with compiled scripts from:
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
