@@ -62,7 +62,7 @@ OfferMyAutToExe(exePath) {
  */
 EnsureMyAutToExeInstalled() {
     ; Check if myAutToExe is already installed to Desktop
-    desktopPath := A_Desktop . "\myAutToExe"
+    desktopPath := A_Desktop . "\mATE"
 
     ; Search for myAutToExe.exe in the installation folder
     myAutToExePath := ""
@@ -94,31 +94,15 @@ EnsureMyAutToExeInstalled() {
 DownloadMyAutToExe() {
     ShowProgress("Downloading myAutToExe decompiler...", 1, "AHK-Hacker")
 
-    desktopPath := A_Desktop . "\myAutToExe"
-    apiUrl := "https://api.github.com/repos/daovantrong/myAutToExe/releases/latest"
+    desktopPath := A_Desktop . "\mATE"
+    downloadUrl := "https://github.com/KnifMelti/SandboxStart/raw/master/Source/assets/mATE.zip"
 
     try {
-        ; Download release info from GitHub API
-        whr := ComObject("WinHttp.WinHttpRequest.5.1")
-        whr.Open("GET", apiUrl, false)
-        whr.SetRequestHeader("User-Agent", "AHK-Hacker")
-        whr.Send()
-
-        jsonResponse := whr.ResponseText
-
-        ; Find zipball_url (latest release source)
-        if (RegExMatch(jsonResponse, '"zipball_url"\s*:\s*"([^"]+)"', &match)) {
-            zipUrl := match[1]
-        } else {
-            ShowProgress("Could not find myAutToExe download URL", 3, "AHK-Hacker Error")
-            return ""
-        }
-
         ; Download ZIP file to temp location
-        tempZip := A_Temp . "\myAutToExe_temp.zip"
+        tempZip := A_Temp . "\mATE_temp.zip"
         try FileDelete(tempZip)
 
-        Download(zipUrl, tempZip)
+        Download(downloadUrl, tempZip)
 
         if (!FileExist(tempZip)) {
             ShowProgress("Failed to download myAutToExe", 3, "AHK-Hacker Error")
@@ -127,69 +111,39 @@ DownloadMyAutToExe() {
 
         ShowProgress("Download complete, extracting files...", 1, "AHK-Hacker")
 
-        ; Extract ZIP to Desktop\myAutToExe\
-        ShowProgress("Installing myAutToExe to Desktop...", 1, "AHK-Hacker")
-
         ; Remove old installation if it exists
         if (DirExist(desktopPath)) {
             try DirDelete(desktopPath, true)
         }
 
-        ; Create destination folder
-        try DirCreate(desktopPath)
-
         ; Extract to temp folder first
-        tempExtract := A_Temp . "\myAutToExe_extract"
+        tempExtract := A_Temp . "\mATE_extract"
         if (DirExist(tempExtract)) {
             try DirDelete(tempExtract, true)
         }
         try DirCreate(tempExtract)
 
-        ; Show notification that will stay visible during extraction (25 seconds)
-        ShowProgress("Extracting archive (this may take 20-25 seconds)...", 1, "AHK-Hacker", 25000)
+        ; Show notification that will stay visible during extraction (15 seconds)
+        ShowProgress("Extracting archive (this may take 10-15 seconds)...", 1, "AHK-Hacker", 15000)
 
-        ; Extract using PowerShell (takes ~10-15 seconds)
+        ; Extract using PowerShell
         psCmd := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command `"Expand-Archive -Path '" . tempZip . "' -DestinationPath '" . tempExtract . "' -Force`""
         RunWait(psCmd, , "Hide")
         Sleep(500)
 
-        ; Show next step - extraction done
-        ShowProgress("Archive extracted, organizing files...", 1, "AHK-Hacker")
-
-        ; Find the subdirectory (daovantrong-myAutToExe-*)
-        subDir := ""
-        Loop Files tempExtract . "\*", "D"
-        {
-            if (InStr(A_LoopFileName, "daovantrong-myAutToExe-")) {
-                subDir := A_LoopFileFullPath
-                break
-            }
-        }
-
-        if (subDir = "") {
-            ShowProgress("Could not find myAutToExe subdirectory", 3, "AHK-Hacker Error")
+        ; Move mATE folder from temp to desktop
+        mATESourcePath := tempExtract . "\mATE"
+        if (!DirExist(mATESourcePath)) {
+            ShowProgress("Could not find mATE folder in archive", 3, "AHK-Hacker Error")
             try FileDelete(tempZip)
             try DirDelete(tempExtract, true)
             return ""
         }
 
-        ShowProgress("Copying myAutToExe files...", 1, "AHK-Hacker")
+        ShowProgress("Installing mATE to Desktop...", 1, "AHK-Hacker")
 
-        ; Copy Data folder
-        if (DirExist(subDir . "\Data")) {
-            DirCopy(subDir . "\Data", desktopPath . "\Data", true)
-        }
-
-        ; Copy Tidy folder
-        if (DirExist(subDir . "\Tidy")) {
-            DirCopy(subDir . "\Tidy", desktopPath . "\Tidy", true)
-        }
-
-        ; Copy all root files (not subdirectories)
-        Loop Files subDir . "\*", "F"
-        {
-            FileCopy(A_LoopFileFullPath, desktopPath . "\" . A_LoopFileName, true)
-        }
+        ; Move the mATE folder to desktop
+        DirMove(mATESourcePath, desktopPath, true)
 
         ShowProgress("Unblocking files...", 1, "AHK-Hacker")
 
@@ -221,7 +175,7 @@ DownloadMyAutToExe() {
 
     } catch Error as err {
         ShowProgress("Download error: " . err.Message, 3, "AHK-Hacker Error")
-        try FileDelete(A_Temp . "\myAutToExe_temp.zip")
+        try FileDelete(A_Temp . "\mATE_temp.zip")
         return ""
     }
 }
