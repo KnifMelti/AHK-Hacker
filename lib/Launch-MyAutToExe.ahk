@@ -123,8 +123,8 @@ DownloadMyAutToExe() {
         }
         try DirCreate(tempExtract)
 
-        ; Show notification that will stay visible during extraction (10 seconds)
-        ShowProgress("Extracting archive (this may take 10 seconds)...", 1, "AHK-Hacker", 10000)
+        ; Show notification that will stay visible during extraction (5 seconds)
+        ShowProgress("Extracting archive...", 1, "AHK-Hacker", 50000)
 
         ; Extract using PowerShell
         psCmd := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command `"Expand-Archive -Path '" . tempZip . "' -DestinationPath '" . tempExtract . "' -Force`""

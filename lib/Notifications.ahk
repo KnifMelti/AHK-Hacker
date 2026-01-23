@@ -18,8 +18,10 @@
  * @param duration - How long to show toast in milliseconds (default: 1000)
  */
 ShowToast(message, iconType := 1, duration := 1000) {
-    ; Create GUI window with title (no icon - keeps it simple)
-    toastGui := Gui("+AlwaysOnTop +ToolWindow", "AHK-Hacker")
+    ; Create GUI window with title (ToolWindow hides the title-bar icon)
+    toastGui := Gui("+AlwaysOnTop", "AHK-Hacker")
+    ; Use the compiled EXE icon (or script icon) as the window title icon
+    try toastGui.SetIcon(A_ScriptFullPath)
     toastGui.BackColor := "FFFFFF"
     toastGui.MarginX := 15
     toastGui.MarginY := 15
@@ -30,10 +32,10 @@ ShowToast(message, iconType := 1, duration := 1000) {
 
     ; Add icon (colored, large)
     iconCtrl := toastGui.Add("Text", "x15 y25 w30 h30 c" . colors[iconType + 1], icons[iconType + 1])
-    iconCtrl.SetFont("s20")
+    iconCtrl.SetFont("s20 Bold")
 
     ; Add message text
-    msgCtrl := toastGui.Add("Text", "x55 y15 w280 h60 Center", message)
+    msgCtrl := toastGui.Add("Text", "x55 y25 w280 h30 Center 0x200", message)
     msgCtrl.SetFont("s10", "Segoe UI")
 
     ; Show window (NoActivate prevents stealing focus)
