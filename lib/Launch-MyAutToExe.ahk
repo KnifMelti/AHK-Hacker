@@ -28,19 +28,6 @@ OfferMyAutToExe(exePath) {
         return
     }
 
-    ; Check if myAutToExe is already installed (before ensuring installation)
-    binPath := A_ScriptDir . "\bin\mATE"
-    wasAlreadyInstalled := false
-    if (DirExist(binPath)) {
-        Loop Files binPath . "\*", "FR"
-        {
-            if (A_LoopFileName = "myAutToExe.exe") {
-                wasAlreadyInstalled := true
-                break
-            }
-        }
-    }
-
     ; User wants to try myAutToExe - ensure it's installed
     myAutToExePath := EnsureMyAutToExeInstalled()
 
@@ -59,11 +46,6 @@ OfferMyAutToExe(exePath) {
 
     ; Launch myAutToExe GUI for manual decompilation
     try {
-        ; Only show notification if we just downloaded mATE (not if it was already installed)
-        if (!wasAlreadyInstalled) {
-            ShowProgress("Opening myAutToExe...", 1, "AHK-Hacker")
-        }
-
         ; Launch myAutToExe GUI with the executable loaded
         ; Set working directory to myAutToExe folder so it can find Data folder
         Run '"' . myAutToExePath . '" "' . exePath . '"', myAutToExeDir
