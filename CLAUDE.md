@@ -123,16 +123,15 @@ Unpacker library that automatically handles UPX-compressed executables:
 ### lib/Launch-MyAutToExe.ahk
 Automatic decompilation fallback for very old AutoHotkey executables (v1.0.48.5 and earlier):
 - **OfferMyAutToExe(exePath)** - Shows dialog offering to try myAutToExe decompilation
-- **EnsureMyAutToExeInstalled()** - Checks if myAutToExe is installed to Desktop, downloads if needed
-- **DownloadMyAutToExe()** - Downloads and extracts latest myAutToExe from GitHub zipball_url to Desktop\myAutToExe\
-- Downloads ZIP from GitHub API using zipball_url (latest release source)
-- Extracts subdirectory (daovantrong-myAutToExe-*) to temp folder
-- Selectively copies Data/, Tidy/ folders and root files to Desktop\myAutToExe\
+- **EnsureMyAutToExeInstalled()** - Checks if myAutToExe is installed to bin folder, downloads if needed
+- **DownloadMyAutToExe()** - Downloads and extracts mATE from GitHub to bin\mATE\
+- Downloads ZIP from GitHub (KnifMelti/SandboxStart repository)
+- Extracts mATE folder to bin\mATE\
 - Unblocks all files recursively
 - Runs myAutToExe.exe with /q /s parameters (silent mode, quit when done)
 
 **Installation location:**
-- %USERPROFILE%\Desktop\myAutToExe\ (selective extraction: Data/, Tidy/, and root files only)
+- bin\mATE\ (extracted from mATE.zip)
 
 **Workflow:**
 1. Called when all automatic methods fail (RH5 → RH4 → UPX)

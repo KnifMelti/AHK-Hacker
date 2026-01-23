@@ -61,14 +61,14 @@ OfferMyAutToExe(exePath) {
  * @return String - Path to myAutToExe.exe, or "" if installation failed
  */
 EnsureMyAutToExeInstalled() {
-    ; Check if myAutToExe is already installed to Desktop
-    desktopPath := A_Desktop . "\mATE"
+    ; Check if myAutToExe is already installed to bin folder
+    binPath := A_ScriptDir . "\bin\mATE"
 
     ; Search for myAutToExe.exe in the installation folder
     myAutToExePath := ""
-    if (DirExist(desktopPath)) {
-        ; Look for myAutToExe.exe recursively in Desktop\myAutToExe\
-        Loop Files desktopPath . "\*", "FR"
+    if (DirExist(binPath)) {
+        ; Look for myAutToExe.exe recursively in bin\mATE\
+        Loop Files binPath . "\*", "FR"
         {
             if (A_LoopFileName = "myAutToExe.exe") {
                 myAutToExePath := A_LoopFileFullPath
@@ -88,13 +88,13 @@ EnsureMyAutToExeInstalled() {
 }
 
 /**
- * DownloadMyAutToExe - Downloads and installs myAutToExe to Desktop
+ * DownloadMyAutToExe - Downloads and installs myAutToExe to bin folder
  * @return String - Path to myAutToExe.exe, or "" on failure
  */
 DownloadMyAutToExe() {
     ShowProgress("Downloading myAutToExe decompiler...", 1, "AHK-Hacker")
 
-    desktopPath := A_Desktop . "\mATE"
+    binPath := A_ScriptDir . "\bin\mATE"
     downloadUrl := "https://github.com/KnifMelti/SandboxStart/raw/master/Source/assets/mATE.zip"
 
     try {
@@ -112,8 +112,8 @@ DownloadMyAutToExe() {
         ShowProgress("Download complete, extracting files...", 1, "AHK-Hacker")
 
         ; Remove old installation if it exists
-        if (DirExist(desktopPath)) {
-            try DirDelete(desktopPath, true)
+        if (DirExist(binPath)) {
+            try DirDelete(binPath, true)
         }
 
         ; Extract to temp folder first
@@ -131,7 +131,7 @@ DownloadMyAutToExe() {
         RunWait(psCmd, , "Hide")
         Sleep(500)
 
-        ; Move mATE folder from temp to desktop
+        ; Move mATE folder from temp to bin
         mATESourcePath := tempExtract . "\mATE"
         if (!DirExist(mATESourcePath)) {
             ShowProgress("Could not find mATE folder in archive", 3, "AHK-Hacker Error")
@@ -140,15 +140,21 @@ DownloadMyAutToExe() {
             return ""
         }
 
-        ShowProgress("Installing mATE to Desktop...", 1, "AHK-Hacker")
+        ShowProgress("Installing mATE to bin folder...", 1, "AHK-Hacker")
 
-        ; Move the mATE folder to desktop
-        DirMove(mATESourcePath, desktopPath, true)
+        ; Ensure bin folder exists
+        binDir := RegExReplace(binPath, "\\mATE$", "")
+        if (!DirExist(binDir)) {
+            try DirCreate(binDir)
+        }
+
+        ; Move the mATE folder to bin
+        DirMove(mATESourcePath, binPath, true)
 
         ShowProgress("Unblocking files...", 1, "AHK-Hacker")
 
         ; Unblock all files recursively
-        psUnblock := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command `"Get-ChildItem -Path '" . desktopPath . "' -Recurse | Unblock-File`""
+        psUnblock := "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command `"Get-ChildItem -Path '" . binPath . "' -Recurse | Unblock-File`""
         RunWait(psUnblock, , "Hide")
 
         ; Clean up temp files
@@ -157,7 +163,7 @@ DownloadMyAutToExe() {
 
         ; Find myAutToExe.exe in the extracted files
         myAutToExePath := ""
-        Loop Files desktopPath . "\*", "FR"
+        Loop Files binPath . "\*", "FR"
         {
             if (A_LoopFileName = "myAutToExe.exe") {
                 myAutToExePath := A_LoopFileFullPath

@@ -100,6 +100,7 @@ AHK-Hacker\
     ├── ResourceHacker4.exe       (Bundled legacy version - v4.x)
     ├── upx.exe                   (Downloaded on-demand for unpacking)
     ├── .rh_version               (Version cache)
+    ├── mATE\                     (myAutToExe decompiler - downloaded on-demand)
     ├── Help\                     (Resource Hacker documentation)
     └── samples\                  (Resource Hacker samples)
 ```
@@ -116,6 +117,7 @@ AHK-Hacker\
 This will automatically:
 - Remove the context menu integration
 - Delete downloaded ResourceHacker files from `bin/` folder
+- Delete downloaded mATE decompiler from `bin/mATE/` folder
 - Keep ResourceHacker4.exe (bundled version)
 
 **Note:** The AHK-Hacker folder itself is not deleted. You can manually delete it if you want to remove everything.
