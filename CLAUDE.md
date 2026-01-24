@@ -45,8 +45,8 @@ AHK-Hacker\
     │   ├── Unpack-Exe.ahk            (Downloads UPX unpacker for packed executables)
     │   └── Launch-MyAutToExe.ahk     (Optional download of mATE for old AHK decompilation)
     └── res\                      (Development resources - synced to GitHub)
-        ├── ResourceHacker4.exe   (Bundled legacy version - v4.x, copied to bin/ in releases)
-        ├── RH.ico                (Resource Hacker icon - used for compilation)
+        ├── ResourceHacker4.exe   (Bundled legacy version - (c) Angus Johnson 1999-2016, copied to bin/ in releases)
+        ├── RH.ico                (AHK-Hacker icon - used for compilation)
         ├── icon.png              (Project icon for README)
         ├── compile_and_sign.ps1  (Build script for development)
         └── sign_exe.ps1          (Code signing script)
@@ -213,6 +213,7 @@ The `src/res/` folder contains development-time resources that are tracked in Gi
 - **sign_exe.ps1**: PowerShell script for code signing with digital certificate
 
 During release, ResourceHacker4.exe is copied to the src/bin/ folder in release packages.
+
 
 
 
