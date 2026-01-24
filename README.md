@@ -96,7 +96,7 @@ AHK-Hacker\
 │   └── Launch-MyAutToExe.ahk     (Optional download of mATE for old AHK decompilation)
 └── bin\                          (Runtime binaries)
     ├── ResourceHacker.exe        (Downloaded automatically - v5.x)
-    ├── ResourceHacker4.exe       (Bundled legacy 4 version - (c) Angus Johnson 1999-2016)
+    ├── ResourceHacker4.exe       (Bundled legacy version - (c) Angus Johnson 1999-2016)
     ├── upx.exe                   (Downloaded on-demand for unpacking)
     ├── .rh_version               (Version cache)
     ├── mATE\                     (myAutToExe decompiler - downloaded on-demand)
@@ -195,6 +195,7 @@ Works with compiled scripts from:
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
