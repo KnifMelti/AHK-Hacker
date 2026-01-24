@@ -77,7 +77,7 @@ The script uses HTTP HEAD requests to check for updates without downloading the 
 
 ---
 
-## Folder Structure
+## Release Folder Structure
 
 ```
 AHK-Hacker\
@@ -195,3 +195,4 @@ Works with compiled scripts from:
 - **Resource Hacker™** - [...a freeware resource compiler & decompiler for Windows® applications](https://www.angusj.com/resourcehacker/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
