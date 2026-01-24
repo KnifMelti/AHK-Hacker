@@ -4,12 +4,12 @@ AutoHotkey decompiler with Windows context menu integration.
 
 ## Project Overview
 
-AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by extracting the embedded RCDATA resource using ResourceHacker. It integrates with the Windows right-click context menu for one-click decompilation.
+AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by extracting the embedded RCDATA resource using Resource Hacker™. It integrates with the Windows right-click context menu for one-click decompilation.
 
 ## Tech Stack
 
 - **Language**: AutoHotkey v2.0
-- **External Tool**: ResourceHacker (downloaded automatically)
+- **External Tool**: Resource Hacker™ (downloaded automatically)
 - **Platform**: Windows 10+
 
 ## File Structure
@@ -35,13 +35,13 @@ AHK-Hacker\
     │   ├── upx.exe               (Downloaded on-demand for unpacking)
     │   ├── .rh_version           (Version cache)
     │   ├── mATE\                 (myAutToExe - downloaded on-demand)
-    │   ├── Help\                 (Resource Hacker documentation)
-    │   └── samples\              (Resource Hacker samples)
+    │   ├── Help\                 (Resource Hacker™ documentation)
+    │   └── samples\              (Resource Hacker™ samples)
     ├── lib\                      (Shared libraries - synced to GitHub)
     │   ├── Notifications.ahk         (Notification library)
     │   ├── Install-ContextMenu.ahk   (Installs right-click menu)
     │   ├── Uninstall-ContextMenu.ahk (Uninstalls right-click menu)
-    │   ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker)
+    │   ├── Update-ResourceHacker.ahk (Downloads latest Resource Hacker™)
     │   ├── Unpack-Exe.ahk            (Downloads UPX unpacker for packed executables)
     │   └── Launch-MyAutToExe.ahk     (Optional download of mATE for old AHK decompilation)
     └── res\                      (Development resources - synced to GitHub)
@@ -57,10 +57,10 @@ AHK-Hacker\
 ### AHK-Hacker.ahk
 Main decompiler that:
 1. Receives .exe path from context menu argument
-2. Runs ResourceHacker 5.x to extract RCDATA resource
-3. Falls back to ResourceHacker 4.x if extraction fails (handles older AHK formats like `>AHK WITH ICON<`)
+2. Runs Resource Hacker™ 5.x to extract RCDATA resource
+3. Falls back to Resource Hacker™ 4.x if extraction fails (handles older AHK formats like `>AHK WITH ICON<`)
 4. Validates extracted content - if empty or too small (< 10 bytes), attempts UPX unpacking via lib/Unpack-Exe.ahk
-5. If UPX succeeds, retries ResourceHacker 5.x → 4.x on unpacked file
+5. If UPX succeeds, retries Resource Hacker™ 5.x → 4.x on unpacked file
 6. If all methods fail, offers to open myAutToExe GUI for manual decompilation (very old AHK <= v1.0.48.5)
 7. Handles both old (`RCData.bin`) and new (`RCDATA1_1.bin`) output formats
 8. Converts line endings to Windows CRLF
@@ -71,7 +71,7 @@ Main decompiler that:
 Installation script that:
 1. Shows OK/Cancel dialog before starting installation
 2. Unblocks all files recursively using PowerShell
-3. Runs lib/Update-ResourceHacker.ahk in silent mode to download latest ResourceHacker to bin/
+3. Runs lib/Update-ResourceHacker.ahk in silent mode to download latest Resource Hacker™ to bin/
 4. Runs lib/Install-ContextMenu.ahk to register context menu
 5. Shows progress notifications via ShowProgress from lib/Notifications.ahk
 
@@ -120,11 +120,11 @@ Unpacker library that automatically handles UPX-compressed executables:
 2. `bin/upx.exe` (downloaded/cached)
 
 **Unpacking workflow:**
-1. Called when ResourceHacker extracts empty/invalid RCDATA (< 10 bytes)
+1. Called when Resource Hacker™ extracts empty/invalid RCDATA (< 10 bytes)
 2. Runs `upx -d input.exe -o output.tmp`
 3. Validates output is valid PE file (starts with "MZ")
 4. Returns path to unpacked temp file on success, "" on failure
-5. AHK-Hacker.ahk retries ResourceHacker on unpacked file
+5. AHK-Hacker.ahk retries Resource Hacker™ on unpacked file
 6. Temporary file is cleaned up after decompilation
 
 ### lib/Launch-MyAutToExe.ahk
@@ -157,9 +157,9 @@ Shared notification library that provides:
 
 ## Development Notes
 
-### ResourceHacker Compatibility
-- **ResourceHacker 5.x**: Latest version, downloaded by lib/Update-ResourceHacker.ahk to bin/ folder. Output naming: `RCDATA1_1.bin`
-- **ResourceHacker 4.x**: Bundled legacy version (stored in `res/ResourceHacker4.exe` in source, copied to `bin/ResourceHacker4.exe` in release packages). Required for older AHK executables that use `>AHK WITH ICON<` resource naming. Output naming: `RCData.bin`
+### Resource Hacker™ Compatibility
+- **Resource Hacker™ 5.x**: Latest version, downloaded by lib/Update-ResourceHacker.ahk to bin/ folder. Output naming: `RCDATA1_1.bin`
+- **Resource Hacker™ 4.x**: Bundled legacy version (stored in `res/ResourceHacker4.exe` in source, copied to `bin/ResourceHacker4.exe` in release packages). Required for older AHK executables that use `>AHK WITH ICON<` resource naming. Output naming: `RCData.bin`
 
 The decompiler tries 5.x first, then falls back to 4.x automatically.
 
@@ -192,8 +192,8 @@ AHK-Hacker uses PE header analysis to detect UPX-packed executables before attem
 `AHK-Hacker.exe` is pre-compiled and digitally signed. The source `AHK-Hacker.ahk` is included for reference.
 
 ### Testing
-1. Run `Install.ahk` (prompts OK/Cancel, then downloads ResourceHacker 5.x to bin/ and installs context menu)
-   - Or run `lib/Update-ResourceHacker.ahk` manually to download ResourceHacker 5.x
+1. Run `Install.ahk` (prompts OK/Cancel, then downloads Resource Hacker™ 5.x to bin/ and installs context menu)
+   - Or run `lib/Update-ResourceHacker.ahk` manually to download Resource Hacker™ 5.x
    - Or run `lib/Install-ContextMenu.ahk` manually to register context menu
 2. Right-click any AHK-compiled .exe and select "AHK-Hacker - Decompile"
 
@@ -206,14 +206,10 @@ AHK-Hacker uses PE header analysis to detect UPX-packed executables before attem
 ## Development Resources (src/res/ folder)
 
 The `src/res/` folder contains development-time resources that are tracked in Git:
-- **ResourceHacker4.exe**: Legacy ResourceHacker v4.x binary (copied to `src/bin/` in release packages)
+- **ResourceHacker4.exe**: Legacy Resource Hacker™ v4.x binary (copied to `src/bin/` in release packages)
 - **RH.ico**: Icon used during compilation (referenced in src/AHK-Hacker.ahk compile directive)
 - **icon.png**: Project icon displayed in README.md
 - **compile_and_sign.ps1**: PowerShell script to compile and sign the executable
 - **sign_exe.ps1**: PowerShell script for code signing with digital certificate
 
 During release, ResourceHacker4.exe is copied to the src/bin/ folder in release packages.
-
-
-
-
