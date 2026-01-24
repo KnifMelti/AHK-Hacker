@@ -28,7 +28,7 @@ jobs:
       - name: Verify line endings (CRLF should be preserved)
         run: |
           echo "Verifying line endings in checked-out files..."
-          file -b AHK-Hacker.ahk Install.ahk README.md
+          file -b src/AHK-Hacker.ahk src/Install.ahk README.md
           echo "All files should show 'CRLF line terminators'"
 
       - name: Prepare release files
@@ -36,24 +36,26 @@ jobs:
           mkdir -p AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib
           mkdir -p AHK-Hacker-v${{ steps.version.outputs.VERSION }}/bin
 
-          # Root files
-          cp AHK-Hacker.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
-          cp AHK-Hacker.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
-          cp Install.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
-          cp Uninstall.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
-          cp res/RH.ico AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          # Copy README to root
           cp README.md AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
 
-          # lib/ folder - helper scripts
-          cp lib/Notifications.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
-          cp lib/Install-ContextMenu.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
-          cp lib/Uninstall-ContextMenu.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
-          cp lib/Update-ResourceHacker.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
-          cp lib/Unpack-Exe.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
-          cp lib/Launch-MyAutToExe.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+          # Copy all src/ contents to release root (flat structure)
+          cp src/AHK-Hacker.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp src/AHK-Hacker.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp src/Install.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp src/Uninstall.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
+          cp src/res/RH.ico AHK-Hacker-v${{ steps.version.outputs.VERSION }}/
 
-          # bin/ folder - bundled ResourceHacker4.exe
-          cp res/ResourceHacker4.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/bin/
+          # Copy lib/
+          cp src/lib/Notifications.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+          cp src/lib/Install-ContextMenu.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+          cp src/lib/Uninstall-ContextMenu.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+          cp src/lib/Update-ResourceHacker.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+          cp src/lib/Unpack-Exe.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+          cp src/lib/Launch-MyAutToExe.ahk AHK-Hacker-v${{ steps.version.outputs.VERSION }}/lib/
+
+          # Copy bundled ResourceHacker4.exe to bin/
+          cp src/res/ResourceHacker4.exe AHK-Hacker-v${{ steps.version.outputs.VERSION }}/bin/
 
       - name: Create release archive
         run: |

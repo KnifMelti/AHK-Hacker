@@ -1,8 +1,8 @@
 # Logs
-log/*.log
+src/log/*.log
 
 # ResourceHacker bin folder (all executables and downloaded files)
-bin/
+src/bin/
 
 # Temporary files
 *.bin
