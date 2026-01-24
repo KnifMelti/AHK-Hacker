@@ -86,7 +86,6 @@ AHK-Hacker\
 ├── Install.ahk                   (Installer - unblocks files etc...)
 ├── Uninstall.ahk                 (Uninstaller - removes context menu etc...)
 ├── RH.ico                        (Resource Hacker icon)
-├── README.md                     (You're reading it...)
 ├── log\                          (Decompilation logs)
 ├── lib\                          (Shared libraries)
 │   ├── Notifications.ahk         (Notification library)
@@ -196,6 +195,7 @@ Works with compiled scripts from:
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
