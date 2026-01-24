@@ -86,7 +86,6 @@ AHK-Hacker\
 ├── Install.ahk                   (Installer - unblocks files etc...)
 ├── Uninstall.ahk                 (Uninstaller - removes context menu etc...)
 ├── RH.ico                        (Resource Hacker icon)
-├── README.md                     (You're reading it...)
 ├── log\                          (Decompilation logs)
 ├── lib\                          (Shared libraries)
 │   ├── Notifications.ahk         (Notification library)
@@ -166,7 +165,7 @@ If you prefer to uninstall manually:
 ## Requirements
 
 - **Windows**: 10 or later
-- **AutoHotkey**: v2.0+ (for running helper scripts: Install/Uninstall-ContextMenu, Update-ResourceHacker)
+- **AutoHotkey**: v2.0+ (for running helper scripts: Install/Uninstall etc...)
 - **Internet**: Required for Resource Hacker updates
 
 ---
@@ -196,6 +195,8 @@ Works with compiled scripts from:
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
+
 
 
 
