@@ -1,11 +1,13 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 #Include lib/Notifications.ahk
+#Include lib/Unpack-Exe.ahk
+#Include lib/Launch-MyAutToExe.ahk
 ;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.2.2.6
+;@Ahk2Exe-Set FileVersion, 3.2.2.7
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -187,7 +189,7 @@ if (!binFound && FileExist(resourceHacker4Path)) {
 ; Check that extraction succeeded
 if (!binFound) {
     ; STEP 3.5: CHECK UPX DETECTION BEFORE UNPACKING
-    #Include lib/Unpack-Exe.ahk
+    ; IsUPXPacked() and TryUnpackExe() are defined in lib/Unpack-Exe.ahk (included at top of file)
 
     ; Check if file is UPX-packed before attempting unpacking
     FileAppend("`n===== UPX DETECTION =====`n", logFile, "UTF-8-RAW")
@@ -304,7 +306,7 @@ if (!binFound) {
         try FileDelete("RCData.rc")
 
         ; Offer myAutToExe for very old AHK executables
-        #Include lib/Launch-MyAutToExe.ahk
+        ; OfferMyAutToExe() is defined in lib/Launch-MyAutToExe.ahk (included at top of file)
         OfferMyAutToExe(exePath)
         ExitApp(1)
     }
@@ -357,7 +359,7 @@ if (StrLen(scriptContent) < 10) {
     try FileDelete("RCData.rc")
 
     ; Check UPX detection before unpacking
-    #Include lib/Unpack-Exe.ahk
+    ; IsUPXPacked() and TryUnpackExe() are defined in lib/Unpack-Exe.ahk (included at top of file)
 
     ; Check if file is UPX-packed before attempting unpacking
     FileAppend("`n===== UPX DETECTION (SMALL CONTENT) =====`n", logFile, "UTF-8-RAW")
@@ -477,7 +479,7 @@ if (StrLen(scriptContent) < 10) {
             try FileDelete("RCData.rc")
 
             ; Offer myAutToExe for very old AHK executables
-            #Include lib/Launch-MyAutToExe.ahk
+            ; OfferMyAutToExe() is defined in lib/Launch-MyAutToExe.ahk (included at top of file)
             OfferMyAutToExe(exePath)
             ExitApp(1)
         }
@@ -497,7 +499,6 @@ if (StrLen(scriptContent) < 10) {
             try FileDelete("RCData.rc")
 
             ; Offer myAutToExe for very old AHK executables
-            #Include lib/Launch-MyAutToExe.ahk
             OfferMyAutToExe(exePath)
             ExitApp(1)
         }
@@ -505,7 +506,6 @@ if (StrLen(scriptContent) < 10) {
         ; Unpacking failed - offer myAutToExe
         try FileDelete("RCData.rc")
 
-        #Include lib/Launch-MyAutToExe.ahk
         OfferMyAutToExe(exePath)
         ExitApp(1)
     }
