@@ -192,6 +192,6 @@ Works with compiled scripts from:
 
 - **AHK-Hacker** based on [AutoHotkey Decompiler v2.97.00C by Jake (A-gent)](https://github.com/A-gent/AutoHotkey-Decompiler)
 - **AutoHotkey - Powerful. Easy to learn.** [The ultimate automation scripting language for Windows.](https://www.autohotkey.com/)
+- **Resource Hacker™** - [...a freeware resource compiler & decompiler for Windows® applications](http://www.angusj.com/resourcehacker/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
-- **Resource Hacker™** by Angus Johnson - [...a freeware resource compiler & decompiler for Windows® applications](http://www.angusj.com/resourcehacker/)
