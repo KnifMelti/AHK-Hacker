@@ -34,7 +34,7 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 
 This will automatically:
 - Unblock all files (removes Windows security warnings)
-- Download the latest ResourceHacker 5.x to `bin\` folder
+- Download the latest Resource Hacker 5.x to `bin\` folder
 - Install the context menu integration
 
 **Done!** No administrator privileges required.
@@ -44,7 +44,7 @@ This will automatically:
 If you prefer to install manually:
 1. Unblock the downloaded `.zip` (right-click `.zip` → Properties → Unblock)
 2. Extract the zip file
-4. Run `lib\Update-ResourceHacker.ahk` to download ResourceHacker 5.x to `bin\` folder
+4. Run `lib\Update-ResourceHacker.ahk` to download Resource Hacker 5.x to `bin\` folder
 5. Run `lib\Install-ContextMenu.ahk` to add the context menu
 
 ---
@@ -85,7 +85,7 @@ AHK-Hacker\
 ├── AHK-Hacker.exe                (Compiled and signed executable)
 ├── Install.ahk                   (Installer - unblocks files etc...)
 ├── Uninstall.ahk                 (Uninstaller - removes context menu etc...)
-├── RH.ico                        (Resource Hacker icon)
+├── RH.ico                        (AHK-Hacker icon)
 ├── log\                          (Decompilation logs)
 ├── lib\                          (Shared libraries)
 │   ├── Notifications.ahk         (Notification library)
@@ -115,7 +115,7 @@ AHK-Hacker\
 
 This will automatically:
 - Remove the context menu integration
-- Delete downloaded ResourceHacker files from `bin\` folder
+- Delete downloaded Resource Hacker files from `bin\` folder
 - Delete downloaded mATE decompiler from `bin\mATE\` folder
 - Keep ResourceHacker4.exe (bundled version) under `bin\`
 
@@ -195,6 +195,7 @@ Works with compiled scripts from:
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
