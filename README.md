@@ -166,7 +166,7 @@ If you prefer to uninstall manually:
 
 - **Windows**: 10 or later
 - **AutoHotkey**: v2.0+ (for running helper scripts: Install/Uninstall etc...)
-- **Internet**: Required for Resource Hacker updates
+- **Internet**: Required for downloading **Resource Hacker** / **UPX** / **mATE**
 
 ---
 
@@ -195,6 +195,7 @@ Works with compiled scripts from:
 - **Resource Hacker** by Angus Johnson - http://www.angusj.com/resourcehacker/
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
