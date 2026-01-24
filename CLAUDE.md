@@ -138,7 +138,7 @@ Automatic decompilation fallback for very old AutoHotkey executables (v1.0.48.5 
 - Downloads ZIP from GitHub (KnifMelti/SandboxStart repository)
 - Extracts mATE folder to bin\mATE\
 - Unblocks all files recursively
-- Runs myAutToExe.exe with /q /s parameters (silent mode, quit when done)
+- Runs myAutToExe.exe GUI
 
 **Installation location:**
 - bin\mATE\ (extracted from mATE.zip)
@@ -147,10 +147,7 @@ Automatic decompilation fallback for very old AutoHotkey executables (v1.0.48.5 
 1. Called when all automatic methods fail (RH5 → RH4 → UPX)
 2. Shows Yes/No dialog asking if user wants to try myAutToExe
 3. If Yes: ensures myAutToExe is installed (downloads if needed, with progress notifications)
-4. Runs myAutToExe.exe in silent mode: `myAutToExe.exe "input.exe" /q /s`
-5. Waits for decompilation to complete
-6. Renames output from `filename.ahk` to `filename_decompiled.ahk`
-7. Shows success or failure message
+4. Runs myAutToExe.exe GUI
 
 ### lib/Notifications.ahk
 Shared notification library that provides:
@@ -216,3 +213,4 @@ The `src/res/` folder contains development-time resources that are tracked in Gi
 - **sign_exe.ps1**: PowerShell script for code signing with digital certificate
 
 During release, ResourceHacker4.exe is copied to the src/bin/ folder in release packages.
+
