@@ -14,7 +14,7 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 
 - **One-click decompilation** - Right-click context menu integration
 - **Automatic file naming** - Output as `filename_decompiled.ahk`
-- **Works anywhere** - Decompile files from any location
+- **Works anywhere** - Decompile files from any location (R/O | R/W) 
 - **No admin rights needed** - Uses HKEY_CURRENT_USER registry
 - **Update Resource Hacker™** - Built-in updater script
 - **Automatic UPX unpacking** - Detects and unpacks UPX-compressed executables
@@ -201,6 +201,7 @@ Works with compiled scripts from:
 - **Resource Hacker™** - [...a freeware resource compiler & decompiler for Windows® applications](https://www.angusj.com/resourcehacker/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
