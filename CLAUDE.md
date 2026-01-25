@@ -225,7 +225,7 @@ When attempting to create `>AHK WITH ICON<.bin`, Windows rejects the filename du
 Resource Hacker 5.x provides no mechanism to override or sanitize the output filename for extracted binary resources.
 
 **Impact:**
-This bug affects decompilation of AutoHotkey v1.0 executables compiled with the `>AHK WITH ICON<` resource format. Resource Hacker 4.x fallback is **mandatory** and cannot be replaced with an escape sequence workaround.
+This bug affects decompilation of AutoHotkey <= v1.1.30.0 executables compiled with the `>AHK WITH ICON<` resource format. Resource Hacker 4.x fallback is **mandatory** and cannot be replaced with an escape sequence workaround.
 
 **Affected Versions:**
 - Resource Hacker v5.2.8 (build 448) - Confirmed (tested on 2026-01-25)
@@ -278,5 +278,6 @@ The `src/res/` folder contains development-time resources that are tracked in Gi
 - **sign_exe.ps1**: PowerShell script for code signing with digital certificate
 
 During release, ResourceHacker4.exe is copied to the src/bin/ folder in release packages.
+
 
 
