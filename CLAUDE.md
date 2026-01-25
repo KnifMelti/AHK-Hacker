@@ -168,6 +168,70 @@ The decompiler tries 5.x first, then falls back to 4.x automatically.
 - **Release packages**: ResourceHacker4.exe is copied to `src/bin/` folder by the GitHub Actions workflow
 - **Runtime**: AHK-Hacker.ahk always looks for ResourceHacker4.exe in `bin/` folder (relative to script location)
 
+#### Resource Hacker™ 5.x Known Bug - Special Characters in Resource Names
+
+**Confirmed Bug:** Resource Hacker 5.x fails to extract RCDATA resources via command-line when the resource name contains special characters (`<` and `>`), specifically the `>AHK WITH ICON<` resource used by older AutoHotkey executables.
+
+**Symptoms:**
+- GUI correctly displays the resource in the tree view
+- Command-line extraction creates the `.rc` file with the reference `>AHK WITH ICON< RCDATA ">AHK WITH ICON<.bin"`
+- The actual `.bin` file is **never created** on disk
+
+**Test Commands (all fail to create .bin file):**
+```bash
+# Standard extraction (fails)
+ResourceHacker.exe -open "input.exe" -save "output.rc" -action extract -mask RCDATA,, -log "log.txt"
+
+# Specific resource name (fails)
+ResourceHacker.exe -open "input.exe" -save "output.rc" -action extract -mask "RCDATA,>AHK WITH ICON<," -log "log.txt"
+
+# Escape attempts (all fail)
+ResourceHacker.exe -open "input.exe" -save "output.rc" -action extract -mask "RCDATA,\>AHK WITH ICON\<," -log "log.txt"
+ResourceHacker.exe -open "input.exe" -save "output.rc" -action extract -mask "RCDATA,\\>AHK WITH ICON\\<," -log "log.txt"
+ResourceHacker.exe -open "input.exe" -save "output.rc" -action extract -mask "RCDATA,^>AHK WITH ICON^<," -log "log.txt"
+ResourceHacker.exe -open "input.exe" -save "output.rc" -action extract -mask "RCDATA,%3EAHK WITH ICON%3C," -log "log.txt"
+```
+
+**Result:** All commands above create only the `.rc` file (containing MENU, DIALOG, ACCELERATORS resources and the RCDATA reference), but the `.bin` file is not extracted.
+
+**Resource Hacker 4.x Comparison (works correctly):**
+```bash
+# Same command with v4.x successfully creates RCData.bin
+ResourceHacker4.exe -open "input.exe" -save "output.rc" -action extract -mask RCDATA,, -log "log.txt"
+```
+
+**Verified Results:**
+- **RH 5.x:** Creates only `.rc` file (3,942 bytes), no `.bin` file
+- **RH 4.x:** Creates both `.rc` file (3,942 bytes) AND `RCData.bin` (419 bytes with valid AutoHotkey v1.1 script)
+
+**Root Cause:**
+Resource Hacker 5.x uses the resource name directly as the output filename without sanitization or validation. Windows prohibits the following characters in filenames:
+```
+< > : " / \ | ? *
+```
+
+When attempting to create `>AHK WITH ICON<.bin`, Windows rejects the filename due to the `<` and `>` characters, causing silent failure.
+
+**Filename Strategy Comparison:**
+- **RH 4.x:** Uses generic safe names (`RCData.bin`) regardless of resource name
+- **RH 5.x:** Uses resource name directly (e.g., `RCDATA1_1.bin` for numeric IDs, `>AHK WITH ICON<.bin` for string names)
+
+**Attempted Workarounds (all failed):**
+- Escape sequences in `-mask` parameter (backslash, caret, URL encoding)
+- Extracting to folder instead of file (creates only `ExtractedResources.rc`)
+- Wildcard resource masks (same issue)
+
+Resource Hacker 5.x provides no mechanism to override or sanitize the output filename for extracted binary resources.
+
+**Impact:**
+This bug affects decompilation of AutoHotkey v1.0 executables compiled with the `>AHK WITH ICON<` resource format. Resource Hacker 4.x fallback is **mandatory** and cannot be replaced with an escape sequence workaround.
+
+**Affected Versions:**
+- Resource Hacker v5.2.8 (build 448) - Confirmed (tested on 2026-01-25)
+
+**Workaround:**
+AHK-Hacker maintains Resource Hacker 4.x as a bundled fallback. The decompiler automatically falls back to v4.x when v5.x fails to extract `.bin` files (detected at AHK-Hacker.ahk:145-187).
+
 ### UPX Detection
 
 AHK-Hacker uses PE header analysis to detect UPX-packed executables before attempting unpacking:
