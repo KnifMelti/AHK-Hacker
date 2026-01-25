@@ -17,13 +17,15 @@ global SilentMode := false
  * TryUnpackExe - Attempts to unpack a UPX-compressed executable
  * @param exePath - Path to the packed executable
  * @param logFile - Path to log file for appending unpacking logs
+ * @param writableDir - Optional writable directory for output (defaults to source directory)
  * @return String - Path to unpacked temp file on success, "" on failure
  */
-TryUnpackExe(exePath, logFile) {
+TryUnpackExe(exePath, logFile, writableDir := "") {
     ; Generate temporary output path for unpacked exe
     SplitPath(exePath, &fileName, &fileDir)
     timestamp := A_Now
-    unpackedPath := fileDir . "\" . fileName . ".unpacked." . timestamp . ".tmp"
+    targetDir := (writableDir != "") ? writableDir : fileDir
+    unpackedPath := targetDir . "\" . fileName . ".unpacked." . timestamp . ".tmp"
 
     ; Append to log
     FileAppend("`n===== UNPACKING ATTEMPT (UPX) =====`n", logFile, "UTF-8-RAW")
@@ -95,16 +97,8 @@ FindUpx() {
     searchPaths.Push(A_ProgramFiles . "\AutoHotkey\Compiler\upx.exe")
 
     ; Get bin directory relative to AHK-Hacker.exe location
-    try {
-        registryPath := RegRead("HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker\command")
-        registryPath := StrReplace(registryPath, '"', '')
-        registryPath := Trim(StrSplit(registryPath, " ")[1])
-        SplitPath(registryPath, , &installDir)
-        searchPaths.Push(installDir . "\bin\upx.exe")
-    } catch {
-        SplitPath(A_ScriptFullPath, , &exeDir)
-        searchPaths.Push(exeDir . "\..\bin\upx.exe")
-    }
+    SplitPath(A_ScriptFullPath, , &installDir)
+    searchPaths.Push(installDir . "\bin\upx.exe")
 
     ; Check each location
     for index, path in searchPaths {
@@ -123,17 +117,8 @@ FindUpx() {
  */
 DownloadUpx(logFile) {
     ; Get bin directory
-    binDir := ""
-    try {
-        registryPath := RegRead("HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker\command")
-        registryPath := StrReplace(registryPath, '"', '')
-        registryPath := Trim(StrSplit(registryPath, " ")[1])
-        SplitPath(registryPath, , &installDir)
-        binDir := installDir . "\bin"
-    } catch {
-        SplitPath(A_ScriptFullPath, , &exeDir)
-        binDir := exeDir . "\..\bin"
-    }
+    SplitPath(A_ScriptFullPath, , &installDir)
+    binDir := installDir . "\bin"
 
     ; Ensure bin directory exists
     if (!FileExist(binDir)) {

@@ -20,6 +20,7 @@ AHK-Hacker\
 │   └── workflows\
 │       └── release.yml                   (Release automation)
 ├── src\                                  (Source code)
+│   ├── ahk\                              (Decompiled output - git-ignored, when source is read-only)
 │   ├── bin\                              (Runtime binaries - git-ignored)
 │   │   ├── Help\                         (Resource Hacker™ documentation)
 │   │   ├── mATE\                         (myAutToExe - downloaded on-demand)

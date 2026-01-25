@@ -1,6 +1,9 @@
 # Logs
 src/log/*.log
 
+# Output folder for read-only sources
+src/ahk/
+
 # ResourceHacker bin folder (all executables and downloaded files)
 src/bin/
 

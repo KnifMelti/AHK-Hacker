@@ -12,7 +12,7 @@
 ; ====================================================================
 
 ; Show uninstallation prompt with OK/Cancel
-result := MsgBox("AHK-Hacker Uninstallation`n=========================`n`nThis will:`n• Remove context menu integration`n• Delete downloaded ResourceHacker files`n• Delete downloaded mATE decompiler`n• Keep ResourceHacker4.exe (bundled version)`n`nDo you want to continue?", "AHK-Hacker Uninstallation", "OKCancel 48")
+result := MsgBox("AHK-Hacker Uninstallation`n=========================`n`nThis will:`n• Remove context menu integration`n• Delete downloaded ResourceHacker files`n• Delete downloaded mATE decompiler`n• Keep ResourceHacker4.exe (bundled version)`n• Keep log files and ahk output folder`n`nDo you want to continue?", "AHK-Hacker Uninstallation", "OKCancel 48")
 if (result = "Cancel") {
     ExitApp(0)
 }
@@ -75,5 +75,5 @@ if (FileExist(binDir)) {
 ; STEP 3: COMPLETION
 ; ====================================================================
 
-MsgBox("Uninstallation complete!`n`nContext menu removed and downloaded files cleaned up.`n`nNote: ResourceHacker4.exe (bundled version), log files, and the AHK-Hacker folder are kept.`nYou can manually delete the folder if you want to remove everything.", "Success", 64)
+MsgBox("Uninstallation complete!`n`nContext menu removed and downloaded files cleaned up.`n`nNote: ResourceHacker4.exe (bundled version), log files, ahk output folder, and the AHK-Hacker folder are kept.`nYou can manually delete the folder if you want to remove everything.", "Success", 64)
 ExitApp(0)

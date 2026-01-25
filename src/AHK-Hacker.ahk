@@ -7,7 +7,7 @@
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.2.2.8
+;@Ahk2Exe-Set FileVersion, 3.2.3.0
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -22,6 +22,31 @@
 ;
 ; Usage: Right-click on any .exe file and select "AHK-Hacker - Decompile"
 ; ====================================================================
+
+/**
+ * CanWriteToDirectory - Tests if a directory is writable
+ * @param dirPath - Path to directory to test
+ * @return Boolean - true if writable, false if read-only
+ */
+CanWriteToDirectory(dirPath) {
+    if (!DirExist(dirPath)) {
+        return false
+    }
+
+    ; Generate random test filename
+    testFile := dirPath . "\.ahk_hacker_write_test_" . A_TickCount . ".tmp"
+
+    try {
+        ; Try to create a test file
+        FileAppend("", testFile)
+        ; If successful, delete it
+        FileDelete(testFile)
+        return true
+    } catch {
+        ; Write failed - directory is read-only
+        return false
+    }
+}
 
 ; Get path from context menu (Windows sends "%1" as parameter)
 if (A_Args.Length = 0) {
@@ -59,6 +84,9 @@ if (fileExt != "exe") {
     ExitApp(1)
 }
 
+; Get AHK-Hacker installation directory (needed for output path logic)
+SplitPath(A_ScriptFullPath, , &installDir)
+
 ; ====================================================================
 ; STEP 2: PREPARATION
 ; ====================================================================
@@ -68,7 +96,21 @@ SplitPath(fileName, , , , &fileBaseName)
 
 ; Generate output name
 outputName := fileBaseName . "_decompiled"
-outputPath := fileDir . "\" . outputName . ".ahk"
+
+; Determine writable output location
+if (CanWriteToDirectory(fileDir)) {
+    ; Source directory is writable - use current behavior
+    outputPath := fileDir . "\" . outputName . ".ahk"
+    usedFallbackFolder := false
+} else {
+    ; Source directory is read-only - use fallback folder under AHK-Hacker installation
+    ahkFolder := installDir . "\ahk"
+    if (!FileExist(ahkFolder)) {
+        DirCreate(ahkFolder)
+    }
+    outputPath := ahkFolder . "\" . outputName . ".ahk"
+    usedFallbackFolder := true
+}
 
 ; Create timestamp for log
 timestamp := A_YYYY . A_MM . A_DD . "_" . A_Hour . A_Min . A_Sec
@@ -89,28 +131,9 @@ Loop Files "RCDATA*.bin"
 ; STEP 3: DECOMPILATION
 ; ====================================================================
 
-; Build paths to ResourceHacker versions
-; Get the directory where AHK-Hacker.exe is registered in the registry
-; Read from registry to find the actual installation path
-try {
-    registryPath := RegRead("HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker\command")
-    ; Extract path from registry value (format: "C:\path\to\AHK-Hacker.exe" "%1")
-    ; Remove quotes and the "%1" parameter
-    registryPath := StrReplace(registryPath, '"', '')
-    registryPath := Trim(StrSplit(registryPath, " ")[1])
-
-    ; Get directory from the registry path
-    SplitPath(registryPath, , &installDir)
-
-    resourceHackerPath := installDir . "\bin\ResourceHacker.exe"
-    resourceHacker4Path := installDir . "\bin\ResourceHacker4.exe"
-} catch {
-    ; Fallback: try to find bin folder relative to where we are
-    exeDir := ""
-    SplitPath(A_ScriptFullPath, , &exeDir)
-    resourceHackerPath := exeDir . "\bin\ResourceHacker.exe"
-    resourceHacker4Path := exeDir . "\bin\ResourceHacker4.exe"
-}
+; Build paths to ResourceHacker versions (using already-calculated installDir)
+resourceHackerPath := installDir . "\bin\ResourceHacker.exe"
+resourceHacker4Path := installDir . "\bin\ResourceHacker4.exe"
 
 ; Check that at least one ResourceHacker exists
 if (!FileExist(resourceHackerPath) && !FileExist(resourceHacker4Path)) {
@@ -198,7 +221,7 @@ if (!binFound) {
     if (upxDetected = 1) {
         ; UPX detected - proceed with unpacking
         FileAppend("UPX detected - proceeding with unpacking`n", logFile, "UTF-8-RAW")
-        unpackedPath := TryUnpackExe(exePath, logFile)
+        unpackedPath := TryUnpackExe(exePath, logFile, (usedFallbackFolder ? ahkFolder : ""))
     } else if (upxDetected = 0) {
         ; Not UPX-packed and no RCDATA found - file is likely not an AHK executable
         FileAppend("Not UPX-packed - file is likely not an AutoHotkey executable`n", logFile, "UTF-8-RAW")
@@ -209,7 +232,7 @@ if (!binFound) {
     } else {
         ; Detection failed (-1) - try unpacking anyway as fallback
         FileAppend("UPX detection inconclusive - attempting unpacking anyway`n", logFile, "UTF-8-RAW")
-        unpackedPath := TryUnpackExe(exePath, logFile)
+        unpackedPath := TryUnpackExe(exePath, logFile, (usedFallbackFolder ? ahkFolder : ""))
     }
 
     if (upxDetected != 0 && unpackedPath != "") {
@@ -368,7 +391,7 @@ if (StrLen(scriptContent) < 10) {
     if (upxDetected = 1) {
         ; UPX detected - proceed with unpacking
         FileAppend("UPX detected - proceeding with unpacking`n", logFile, "UTF-8-RAW")
-        unpackedPath := TryUnpackExe(exePath, logFile)
+        unpackedPath := TryUnpackExe(exePath, logFile, (usedFallbackFolder ? ahkFolder : ""))
     } else if (upxDetected = 0) {
         ; Not UPX-packed and no RCDATA found - file is likely not an AHK executable
         FileAppend("Not UPX-packed - file is likely not an AutoHotkey executable`n", logFile, "UTF-8-RAW")
@@ -379,7 +402,7 @@ if (StrLen(scriptContent) < 10) {
     } else {
         ; Detection failed (-1) - try unpacking anyway as fallback
         FileAppend("UPX detection inconclusive - attempting unpacking anyway`n", logFile, "UTF-8-RAW")
-        unpackedPath := TryUnpackExe(exePath, logFile)
+        unpackedPath := TryUnpackExe(exePath, logFile, (usedFallbackFolder ? ahkFolder : ""))
     }
 
     if (upxDetected != 0 && unpackedPath != "") {
@@ -550,6 +573,12 @@ Loop Files "*.unpacked.*.tmp"
 ; ====================================================================
 ; STEP 6: SUCCESS
 ; ====================================================================
+
+; Open output folder if using fallback (read-only source location)
+if (usedFallbackFolder) {
+    SplitPath(outputPath, , &outputDir)
+    Run('explorer.exe "' . outputDir . '"')
+}
 
 ; Show brief success notification
 ShowProgress("Decompiled: " . outputName . ".ahk", 0, "AHK-Hacker")

@@ -65,6 +65,9 @@ If you prefer to install manually:
 Input:  C:\MyPrograms\MyScript.exe
 Output: C:\MyPrograms\MyScript_decompiled.ahk
 Log:    [AHK-Hacker folder]\log\MyScript_decompile_20250118_143052.log
+
+Note: If the source file is on a read-only location, output will be saved to:
+Output: [AHK-Hacker folder]\ahk\MyScript_decompiled.ahk
 ```
 
 ---
@@ -81,6 +84,7 @@ The script uses HTTP HEAD requests to check for updates without downloading the 
 
 ```
 AHK-Hacker\
+├── ahk\                             (Decompiled output - when source is read-only)
 ├── bin\                             (Runtime binaries)
 │   ├── Help\                        (Resource Hacker™ documentation)
 │   ├── mATE\                        (myAutToExe decompiler - downloaded on-demand)
@@ -121,7 +125,7 @@ This will automatically:
 - Delete downloaded mATE decompiler from `bin\mATE\` folder
 - Keep ResourceHacker4.exe (bundled version) under `bin\`
 
-**Note:** The AHK-Hacker folder itself is not deleted. You can manually delete it if you want to remove everything.
+**Note:** The AHK-Hacker folder, log files, and ahk output folder are not deleted. You can manually delete the folder if you want to remove everything.
 
 ### Manual Uninstall
 
