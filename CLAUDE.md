@@ -28,7 +28,7 @@ AHK-Hacker\
 │   │   ├── changes.txt                   (Resource Hacker™ changelog)
 │   │   ├── ReadMe.txt                    (Resource Hacker™ readme)
 │   │   ├── ResourceHacker.exe            (Downloaded automatically - v5.x)
-│   │   ├── ResourceHacker4.exe           (Copied from res/ during installation/release)
+│   │   ├── ResourceHacker4.exe           (Copied from res/ during release)
 │   │   └── upx.exe                       (Downloaded on-demand for unpacking)
 │   ├── lib\                              (Shared libraries - synced to GitHub)
 │   │   ├── Install-ContextMenu.ahk       (Installs right-click menu)
@@ -213,4 +213,5 @@ The `src/res/` folder contains development-time resources that are tracked in Gi
 - **sign_exe.ps1**: PowerShell script for code signing with digital certificate
 
 During release, ResourceHacker4.exe is copied to the src/bin/ folder in release packages.
+
 
