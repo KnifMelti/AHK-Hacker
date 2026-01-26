@@ -189,6 +189,7 @@ HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker
 Works with compiled scripts from:
 - AutoHotkey <= v1.0.48.5 (myAutToExe decompiler used automatically as fallback)
 - AutoHotkey <= v1.1.30.0 (uses Resource Hacker™ 4.x fallback)
+- AutoHotkey <= v1.1.33.02 (investigating...)
 - AutoHotkey v1.1.37.2
 - AutoHotkey v2.x
 
@@ -201,6 +202,7 @@ Works with compiled scripts from:
 - **Resource Hacker™** - [...a freeware resource compiler & decompiler for Windows® applications](https://www.angusj.com/resourcehacker/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
