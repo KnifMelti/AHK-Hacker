@@ -4,14 +4,13 @@ src/log/*.log
 # Output folder for read-only sources
 src/ahk/
 
-# ResourceHacker bin folder (all executables and downloaded files)
+# Runtime binaries (UPX, mATE - downloaded on-demand)
 src/bin/
 
 # Temporary files
 *.bin
 *.rc
 *.res
-resource_hacker_temp.zip
 
 # Windows
 Thumbs.db

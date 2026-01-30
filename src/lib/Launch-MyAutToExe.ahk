@@ -17,15 +17,16 @@ global SilentMode := false
 /**
  * OfferMyAutToExe - Shows dialog offering to try myAutToExe decompilation
  * @param exePath - Path to the AHK executable that failed automatic decompilation
- * @return void - Exits app after user chooses
+ * @param writableDir - Optional writable directory to copy exe to if source is read-only
+ * @return bool - True if monitoring mATE (caller should not exit), False otherwise
  */
-OfferMyAutToExe(exePath) {
+OfferMyAutToExe(exePath, writableDir := "") {
     ; Show dialog asking if user wants to try myAutToExe
     result := MsgBox("Failed to decompile automatically.`n`nThis may be a very old AutoHotkey executable (v1.0.48.5 or earlier).`n`nWould you like to try myAutToExe decompiler?", "AHK-Hacker", "YesNo Icon! 48")
 
     if (result = "No") {
         ; User declined - exit
-        return
+        return false
     }
 
     ; User wants to try myAutToExe - ensure it's installed
@@ -34,12 +35,61 @@ OfferMyAutToExe(exePath) {
     if (myAutToExePath = "") {
         ; Installation failed
         MsgBox("Failed to install myAutToExe.`n`nPlease download manually from:`nhttps://github.com/daovantrong/myAutToExe/releases/latest", "AHK-Hacker Error", "Icon! 16")
-        return
+        return false
     }
 
-    ; Determine output path (same as original exe, with _decompiled.ahk)
-    SplitPath(exePath, &fileName, &fileDir, &fileExt, &fileNameNoExt)
-    outputPath := fileDir . "\" . fileNameNoExt . "_decompiled.ahk"
+    ; Determine working exe path based on directory writability
+    workingExePath := exePath
+    usedFallbackLocation := false
+
+    if (writableDir != "") {
+        ; Source directory is read-only - copy exe to writable location
+        SplitPath(exePath, , , , &fileNameNoExt)
+        timestamp := A_Now
+        ; Use short temp name to avoid long output filenames from mATE
+        workingExePath := writableDir . "\temp_" . timestamp . ".exe"
+
+        try {
+            ShowProgress("Copying executable to writable location...", 1, "AHK-Hacker")
+            FileCopy(exePath, workingExePath, true)
+
+            ; Verify copy succeeded and file is not empty
+            if (!FileExist(workingExePath)) {
+                MsgBox("Failed to copy executable: File does not exist after copy", "AHK-Hacker Error", "Icon! 16")
+                return false
+            }
+
+            ; Check file size to ensure it's not empty
+            originalSize := FileGetSize(exePath)
+            copiedSize := FileGetSize(workingExePath)
+
+            if (copiedSize = 0) {
+                MsgBox("Failed to copy executable: Copied file is empty (0 bytes)", "AHK-Hacker Error", "Icon! 16")
+                try FileDelete(workingExePath)
+                return false
+            }
+
+            if (copiedSize != originalSize) {
+                MsgBox("Failed to copy executable: File size mismatch`n`nOriginal: " . originalSize . " bytes`nCopied: " . copiedSize . " bytes", "AHK-Hacker Error", "Icon! 16")
+                try FileDelete(workingExePath)
+                return false
+            }
+
+            usedFallbackLocation := true
+        } catch Error as err {
+            MsgBox("Failed to copy executable to writable location:`n`n" . err.Message, "AHK-Hacker Error", "Icon! 16")
+            return false
+        }
+    }
+
+    ; Determine output path (same directory as working exe, with _decompiled.ahk)
+    SplitPath(workingExePath, &fileName, &workingFileDir, &fileExt, &fileNameNoExt)
+    outputPath := workingFileDir . "\" . fileNameNoExt . "_decompiled.ahk"
+
+    ; Notify user if using fallback location
+    if (usedFallbackLocation) {
+        ShowProgress("Output will be saved to: " . workingFileDir, 1, "AHK-Hacker", 3000)
+    }
 
     ; Get working directory (where myAutToExe.exe is located)
     SplitPath(myAutToExePath, , &myAutToExeDir)
@@ -48,9 +98,80 @@ OfferMyAutToExe(exePath) {
     try {
         ; Launch myAutToExe GUI with the executable loaded
         ; Set working directory to myAutToExe folder so it can find Data folder
-        Run '"' . myAutToExePath . '" "' . exePath . '"', myAutToExeDir
+        PID := Run('"' . myAutToExePath . '" "' . workingExePath . '"', myAutToExeDir)
+
+        ; If copied exe exists, wait for mATE to close, then cleanup
+        if (usedFallbackLocation && workingExePath != exePath) {
+            ; Wait for mATE window to appear before we start waiting for close
+            ; mATE spawns a subprocess, so the original PID becomes invalid
+            Sleep(1000)
+
+            ; Wait for any myAutToExe process to close (not using PID since it spawns subprocesses)
+            ; We'll poll for the window title instead
+            Loop {
+                ; Check if any myAut2Exe window exists
+                if (!WinExist("myAut2Exe")) {
+                    ; No mATE window found - either hasn't started yet or already closed
+                    Sleep(1000)
+                    ; Check again
+                    if (!WinExist("myAut2Exe")) {
+                        ; Still no window - mATE is done
+                        break
+                    }
+                } else {
+                    ; Window exists - wait for it to close
+                    WinWaitClose("myAut2Exe")
+                    break
+                }
+            }
+
+            ; mATE has closed normally - cleanup temp file and rename output
+            try {
+                ; Find the decompiled .ahk file that mATE created
+                SplitPath(workingExePath, , , , &tempFileNameNoExt)
+                tempAhkFile := workingFileDir . "\" . tempFileNameNoExt . ".ahk"
+
+                ; Determine proper output name based on original exe
+                SplitPath(exePath, , , , &originalNameNoExt)
+                finalAhkFile := workingFileDir . "\" . originalNameNoExt . "_decompiled.ahk"
+
+                ; Rename if temp ahk file exists
+                if (FileExist(tempAhkFile)) {
+                    FileMove(tempAhkFile, finalAhkFile, true)
+                }
+
+                ; Delete temp exe file
+                if (FileExist(workingExePath)) {
+                    FileDelete(workingExePath)
+                }
+
+                ; Also clean up any log files with temp name
+                tempLogFile := workingFileDir . "\" . tempFileNameNoExt . "_myExeToAut.log"
+                if (FileExist(tempLogFile)) {
+                    finalLogFile := workingFileDir . "\" . originalNameNoExt . "_myExeToAut.log"
+                    FileMove(tempLogFile, finalLogFile, true)
+                }
+            }
+
+            ; Open Explorer to show where decompiled file was saved
+            try {
+                Run('explorer.exe "' . workingFileDir . '"')
+            }
+
+            ; Return true to indicate caller should not exit (we already handled everything)
+            return true
+        }
+
+        ; Not using fallback - return false (caller can exit normally)
+        return false
+
     } catch Error as err {
         MsgBox("Failed to launch myAutToExe:`n`n" . err.Message, "AHK-Hacker Error", "Icon! 16")
+        ; Clean up copied exe if it exists
+        if (usedFallbackLocation) {
+            try FileDelete(workingExePath)
+        }
+        return false
     }
 }
 
