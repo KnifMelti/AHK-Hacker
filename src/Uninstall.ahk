@@ -7,12 +7,11 @@
 ; ====================================================================
 ; This script performs the complete uninstallation process:
 ; 1. Removes context menu integration
-; 2. Cleans up downloaded ResourceHacker files from bin/
-; 3. Keeps ResourceHacker4.exe (bundled version)
+; 2. Cleans up downloaded files from bin/ (UPX, mATE)
 ; ====================================================================
 
 ; Show uninstallation prompt with OK/Cancel
-result := MsgBox("AHK-Hacker Uninstallation`n=========================`n`nThis will:`n• Remove context menu integration`n• Delete downloaded ResourceHacker files`n• Delete downloaded mATE decompiler`n• Keep ResourceHacker4.exe (bundled version)`n• Keep log files and ahk output folder`n`nDo you want to continue?", "AHK-Hacker Uninstallation", "OKCancel 48")
+result := MsgBox("AHK-Hacker Uninstallation`n=========================`n`nThis will:`n• Remove context menu integration`n• Delete downloaded UPX unpacker`n• Delete downloaded mATE decompiler`n• Keep log files and ahk output folder`n`nDo you want to continue?", "AHK-Hacker Uninstallation", "OKCancel 48")
 if (result = "Cancel") {
     ExitApp(0)
 }
@@ -47,19 +46,6 @@ if (FileExist(uninstallerPath)) {
 binDir := scriptDir . "\bin"
 
 if (FileExist(binDir)) {
-    ; Delete downloaded ResourceHacker 5.x and related files
-    try FileDelete(binDir . "\ResourceHacker.exe")
-    try FileDelete(binDir . "\ResourceHacker.ini")
-    try FileDelete(binDir . "\ResourceHacker.def")
-    try FileDelete(binDir . "\ReadMe.txt")
-    try FileDelete(binDir . "\changes.txt")
-    try FileDelete(binDir . "\.rh_version")
-    try FileDelete(binDir . "\resource_hacker_temp.zip")
-
-    ; Delete Help and samples folders if they exist
-    try DirDelete(binDir . "\Help", true)
-    try DirDelete(binDir . "\samples", true)
-
     ; Delete downloaded UPX unpacker
     try FileDelete(binDir . "\upx.exe")
 
@@ -75,5 +61,5 @@ if (FileExist(binDir)) {
 ; STEP 3: COMPLETION
 ; ====================================================================
 
-MsgBox("Uninstallation complete!`n`nContext menu removed and downloaded files cleaned up.`n`nNote: ResourceHacker4.exe (bundled version), log files, ahk output folder, and the AHK-Hacker folder are kept.`nYou can manually delete the folder if you want to remove everything.", "Success", 64)
+MsgBox("Uninstallation complete!`n`nContext menu removed and downloaded files cleaned up.`n`nNote: Log files, ahk output folder, and the AHK-Hacker folder are kept.`nYou can manually delete the folder if you want to remove everything.", "Success", 64)
 ExitApp(0)

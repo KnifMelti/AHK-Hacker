@@ -39,13 +39,10 @@ jobs:
           # Copy all src/ contents to release root (flat structure)
           cp src/*.ahk AHK-Hacker/
           cp src/*.exe AHK-Hacker/
-          cp src/res/RH.ico AHK-Hacker/
+          cp src/res/AH.ico AHK-Hacker/
 
           # Copy lib/
           cp src/lib/*.ahk AHK-Hacker/lib/
-
-          # Copy bundled ResourceHacker4.exe to bin/
-          cp src/res/ResourceHacker4.exe AHK-Hacker/bin/
 
       - name: Create release archive
         run: |

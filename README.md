@@ -8,7 +8,7 @@ AutoHotkey Decompiler with Windows Context Menu Integration
 
 ## Overview
 
-AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by extracting the embedded RCDATA resource. Simply right-click any .exe file and select "AHK-Hacker - Decompile".
+AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by directly reading the embedded RCDATA resource via Windows LoadLibrary API. Simply right-click any .exe file and select "AHK-Hacker - Decompile".
 
 ### Features
 
@@ -16,8 +16,10 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 - **Automatic file naming** - Output as `filename_decompiled.ahk`
 - **Works anywhere** - Decompile files from any location `[R/O|R/W]`
 - **No admin rights needed** - Uses HKEY_CURRENT_USER registry
-- **Update Resource Hacker™** - Built-in updater script
+- **Automatic packer detection** - Detects UPX and MPRESS packers
 - **Automatic UPX unpacking** - Detects and unpacks UPX-compressed executables
+- **MPRESS support** - Offers mATE decompiler for MPRESS-packed files
+- **No external dependencies** - Uses native Windows APIs
 
 ---
 
@@ -34,18 +36,16 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by e
 
 This will automatically:
 - Unblock all files (removes Windows security warnings)
-- Download the latest Resource Hacker™ 5.x to `bin\` folder
 - Install the context menu integration
 
-**Done!** No administrator privileges required.
+**Done!** No administrator privileges or external downloads required.
 
 ### Manual Install
 
 If you prefer to install manually:
 1. Unblock the downloaded `.zip` (right-click `.zip` → Properties → Unblock)
 2. Extract the zip file
-4. Run `lib\Update-ResourceHacker.ahk` to download Resource Hacker™ 5.x to `bin\` folder
-5. Run `lib\Install-ContextMenu.ahk` to add the context menu
+3. Run `lib\Install-ContextMenu.ahk` to add the context menu
 
 ---
 
@@ -72,41 +72,26 @@ Output: [AHK-Hacker folder]\ahk\MyScript_decompiled.ahk
 
 ---
 
-## Updating Resource Hacker™
-
-Run `lib\Update-ResourceHacker.ahk` to check for and download the latest version of Resource Hacker™.
-
-The script uses HTTP HEAD requests to check for updates without downloading the full file each time. Version information is cached in `bin\.rh_version`.
-
----
-
 ## Release Folder Structure
 
 ```
 AHK-Hacker\
 ├── ahk\                             (Decompiled output - when source is read-only)
-├── bin\                             (Runtime binaries)
-│   ├── Help\                        (Resource Hacker™ documentation)
-│   ├── mATE\                        (myAutToExe decompiler - downloaded on-demand)
-│   ├── samples\                     (Resource Hacker™ samples)
-│   ├── .rh_version                  (Version cache)
-│   ├── changes.txt                  (Resource Hacker™ changelog)
-│   ├── ReadMe.txt                   (Resource Hacker™ readme)
-│   ├── ResourceHacker.exe           (Downloaded automatically - v5.x)
-│   ├── ResourceHacker4.exe          (Bundled legacy version - © Angus Johnson 1999-2016)
-│   └── upx.exe                      (Downloaded on-demand for unpacking)
+├── bin\                             (Runtime binaries - downloaded on-demand)
+│   ├── mATE\                        (myAutToExe decompiler - downloaded if needed)
+│   └── upx.exe                      (UPX unpacker - downloaded if needed)
 ├── lib\                             (Shared libraries)
 │   ├── Install-ContextMenu.ahk      (Installs right-click menu)
-│   ├── Launch-MyAutToExe.ahk        (Optional download of mATE for old AHK decompilation)
+│   ├── Launch-MyAutToExe.ahk        (Downloads mATE for old/MPRESS AHK decompilation)
 │   ├── Notifications.ahk            (Notification library)
+│   ├── PE-Analysis.ahk              (PE analysis, packer detection, RCData extraction)
 │   ├── Uninstall-ContextMenu.ahk    (Uninstalls right-click menu)
-│   ├── Unpack-Exe.ahk               (Downloads UPX unpacker for packed executables)
-│   └── Update-ResourceHacker.ahk    (Downloads latest Resource Hacker™)
+│   └── Unpack-Exe.ahk               (Downloads UPX unpacker for packed executables)
 ├── log\                             (Decompilation logs)
 ├── AHK-Hacker.ahk                   (Main decompiler script)
 ├── AHK-Hacker.exe                   (Compiled and signed executable)
 ├── Install.ahk                      (Installer - unblocks files etc...)
-├── RH.ico                           (AHK-Hacker icon)
+├── AH.ico                           (AHK-Hacker icon)
 └── Uninstall.ahk                    (Uninstaller - removes context menu etc...)
 ```
 
@@ -121,9 +106,8 @@ AHK-Hacker\
 
 This will automatically:
 - Remove the context menu integration
-- Delete downloaded Resource Hacker™ files from `bin\` folder
+- Delete downloaded UPX unpacker from `bin\` folder
 - Delete downloaded mATE decompiler from `bin\mATE\` folder
-- Keep ResourceHacker4.exe (bundled version) under `bin\`
 
 **Note:** The AHK-Hacker folder, log files, and ahk output folder are not deleted. You can manually delete the folder if you want to remove everything.
 
@@ -137,23 +121,20 @@ If you prefer to uninstall manually:
 
 ## Troubleshooting
 
-### "ResourceHacker.exe not found in bin folder"
+### "This is not an AutoHotkey compiled executable"
 
-**Solution:** Run `lib\Update-ResourceHacker.ahk` to download it to the `bin\` folder.
-
-### "Not an AutoHotkey executable"
-
-**Cause:** The .exe file is not a compiled AutoHotkey script.
+**Cause:** The .exe file is not a compiled AutoHotkey script (validated via RT_MANIFEST resource).
 
 ### "Failed to extract script data"
 
 **Possible causes:**
 - The file is not an AutoHotkey compiled executable
 - The executable is protected/encrypted (e.g., Themida, Enigma)
+- The executable is very old (try the mATE decompiler option)
 - The executable is corrupted
 - Not enough disk space
 
-**Note:** UPX-packed executables are automatically detected and unpacked. If you see this error with a UPX-packed file, check the decompilation log for details.
+**Note:** UPX-packed executables are automatically detected and unpacked. MPRESS-packed files will offer the mATE decompiler automatically.
 
 ### Context menu doesn't appear
 
@@ -172,7 +153,7 @@ If you prefer to uninstall manually:
 
 - **Windows**: 10 or later
 - **AutoHotkey**: v2.0+ (for running helper scripts: Install/Uninstall etc...)
-- **Internet**: Required for downloading **Resource Hacker™** / **UPX** / **mATE**
+- **Internet**: Required for downloading **UPX** / **mATE** (only when needed)
 
 ---
 
@@ -187,11 +168,13 @@ HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker
 ### Supported AutoHotkey Versions
 
 Works with compiled scripts from:
-- AutoHotkey <= v1.0.48.5 (myAutToExe decompiler used automatically as fallback)
-- AutoHotkey <= v1.1.30.0 (uses Resource Hacker™ 4.x fallback)
-- AutoHotkey <= v1.1.33.02 (investigating...)
-- AutoHotkey v1.1.37.2
-- AutoHotkey v2.x
+- AutoHotkey <= v1.0.48.5 (myAutToExe decompiler offered as fallback)
+- AutoHotkey v1.1.x (all versions)
+- AutoHotkey v2.x (all versions)
+
+**Packer Support:**
+- **UPX-packed**: Automatically detected and unpacked
+- **MPRESS-packed**: Automatically detected, mATE decompiler offered
 
 ---
 
@@ -199,7 +182,6 @@ Works with compiled scripts from:
 
 - **AHK-Hacker** - based on: [AutoHotkey Decompiler v2.97.00C by Jake (A-gent)](https://github.com/A-gent/AutoHotkey-Decompiler)
 - **AutoHotkey** - Powerful. Easy to learn: [The ultimate automation scripting language for Windows.](https://www.autohotkey.com/)
-- **Resource Hacker™** - [...a freeware resource compiler & decompiler for Windows® applications](https://www.angusj.com/resourcehacker/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
 
