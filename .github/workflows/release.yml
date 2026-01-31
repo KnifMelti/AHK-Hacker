@@ -34,7 +34,6 @@ jobs:
       - name: Prepare release files
         run: |
           mkdir -p AHK-Hacker/lib
-          mkdir -p AHK-Hacker/bin
 
           # Copy all src/ contents to release root (flat structure)
           cp src/*.ahk AHK-Hacker/
