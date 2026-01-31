@@ -19,7 +19,6 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by d
 - **Automatic packer detection** - Detects UPX and MPRESS packers
 - **Automatic UPX unpacking** - Detects and unpacks UPX-compressed executables
 - **MPRESS support** - Offers mATE decompiler for MPRESS-packed files
-- **No external dependencies** - Uses native Windows APIs
 
 ---
 
@@ -184,6 +183,7 @@ Works with compiled scripts from:
 - **AutoHotkey** - Powerful. Easy to learn: [The ultimate automation scripting language for Windows.](https://www.autohotkey.com/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
