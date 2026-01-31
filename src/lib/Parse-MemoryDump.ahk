@@ -20,12 +20,14 @@
  */
 ParseMemoryDump(exePath, outputDir, logFile) {
     ; Show OK/Cancel dialog with instructions
-    dialogText := "MPRESS-Packed Executable Detected`n`n"
-    dialogText .= "This executable is MPRESS-packed and requires manual memory dumping.`n`n"
+    dialogText := "Memory Dump Instructions`n`n"
+    dialogText .= "System Informer and the MPRESS executable are now running.`n`n"
     dialogText .= "Instructions:`n"
-    dialogText .= "1. Run the executable (keep it running)`n"
-    dialogText .= "2. Use System Informer to dump process memory from 0x400000`n"
-    dialogText .= "3. Save the dump as a .bin file`n`n"
+    dialogText .= "1. Find the process in System Informer`n"
+    dialogText .= "2. Right-click → Properties → Memory tab`n"
+    dialogText .= "3. Memory - Options → Highlight executable pages (recommended)`n"
+    dialogText .= "4. Dump memory from address 0x400000`n"
+    dialogText .= "5. Save as .bin file`n`n"
     dialogText .= "Press OK to select your .bin memory dump file.`n"
     dialogText .= "Press Cancel (or ESC) to exit."
 
@@ -37,7 +39,10 @@ ParseMemoryDump(exePath, outputDir, logFile) {
     }
 
     ; Show file picker for .bin file
-    binFile := FileSelect(1, , "Select Memory Dump File", "Memory Dump Files (*.bin)")
+    ; Start in output directory (same as where decompiled file will be saved)
+    ; This is either the exe's directory (if writable) or ahk folder (if read-only)
+    ; Add trailing backslash to ensure it's recognized as a directory
+    binFile := FileSelect(1, outputDir . "\", "Select Memory Dump File", "Memory Dump Files (*.bin)")
 
     if (binFile = "") {
         FileAppend("User cancelled file selection`r`n", logFile, "UTF-8-RAW")

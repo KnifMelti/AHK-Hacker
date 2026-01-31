@@ -23,11 +23,14 @@ AHK-Hacker\
 │   ├── ahk\                              (Decompiled output - git-ignored, when source is read-only)
 │   ├── bin\                              (Runtime binaries - git-ignored)
 │   │   ├── mATE\                         (myAutToExe - downloaded on-demand)
+│   │   ├── SystemInformer\               (System Informer portable - downloaded on-demand for MPRESS)
 │   │   └── upx.exe                       (Downloaded on-demand for unpacking)
 │   ├── lib\                              (Shared libraries - synced to GitHub)
 │   │   ├── Install-ContextMenu.ahk       (Installs right-click menu)
 │   │   ├── Launch-MyAutToExe.ahk         (Optional download of mATE for old AHK decompilation)
+│   │   ├── Launch-SystemInformer.ahk     (Downloads System Informer for MPRESS memory dumping)
 │   │   ├── Notifications.ahk             (Notification library)
+│   │   ├── Parse-MemoryDump.ahk          (Parses .bin memory dumps from MPRESS executables)
 │   │   ├── PE-Analysis.ahk               (PE analysis, packer detection, RCData extraction)
 │   │   ├── Uninstall-ContextMenu.ahk     (Uninstalls right-click menu)
 │   │   └── Unpack-Exe.ahk                (Downloads UPX unpacker for packed executables)
@@ -55,7 +58,7 @@ Main decompiler that:
 1. Receives .exe path from context menu argument
 2. Analyzes PE file for packer detection (UPX/MPRESS) via lib/PE-Analysis.ahk
 3. Validates AHK signature via manifest (RT_MANIFEST)
-4. If MPRESS → shows instructions and parses user-provided .bin memory dump
+4. If MPRESS → offers System Informer download, launches SI + exe, guides memory dumping
 5. If UPX → unpacks via UPX, then continues
 6. Extracts script data directly from RT_RCDATA resources via LoadLibrary
 7. Tries multiple resource IDs (1, 2, 3, 4, 5, 10, 100, 101, 102, 1000)
@@ -75,7 +78,7 @@ Installation script that:
 Uninstallation script that:
 1. Shows OK/Cancel dialog before starting uninstallation
 2. Runs lib/Uninstall-ContextMenu.ahk in silent mode to remove context menu
-3. Cleans up downloaded files from bin/ (upx.exe, mATE/)
+3. Cleans up downloaded files from bin/ (upx.exe, mATE/, SystemInformer/)
 4. Shows progress notifications via ShowProgress from lib/Notifications.ahk
 
 ### lib/PE-Analysis.ahk
@@ -148,8 +151,8 @@ Memory dump parser for MPRESS-packed executables that allows manual .bin file in
 - StrGet automatically stops at null bytes (no manual truncation needed)
 
 **Workflow:**
-1. Called directly when MPRESS is detected (no mATE fallback)
-2. Shows OK/Cancel dialog with System Informer instructions (address 0x400000)
+1. Called after System Informer and MPRESS exe are launched (via Launch-SystemInformer.ahk)
+2. Shows OK/Cancel dialog with memory dump instructions (address 0x400000)
 3. If OK: user selects .bin file via file picker
 4. Searches for AHK signature in multiple encodings
 5. Extracts script from offset (StrGet handles null byte termination)
@@ -158,9 +161,48 @@ Memory dump parser for MPRESS-packed executables that allows manual .bin file in
 
 **Important Notes:**
 - MPRESS-packed executables cannot be automatically unpacked (no tools available)
-- User must manually dump process memory using System Informer
+- System Informer is automatically downloaded and launched (via Launch-SystemInformer.ahk)
 - Process must be running for script to be loaded in memory
 - mATE is NOT used for MPRESS files (mATE cannot handle MPRESS)
+
+### lib/Launch-SystemInformer.ahk
+System Informer launcher for MPRESS-packed executables:
+- **OfferSystemInformer(exePath, logFile)** - Shows dialog offering System Informer download and launch
+- **FindSystemInformer()** - Searches for System Informer in system locations (Program Files, PATH) and bin folder
+- **EnsureSystemInformerInstalled(logFile)** - Checks if System Informer exists, downloads if needed
+- **DownloadSystemInformer(logFile)** - Downloads portable System Informer from GitHub releases API
+- **LaunchSystemInformer(exePath, systemInformerPath, logFile)** - Launches both System Informer and MPRESS exe
+
+**System Informer Search Order:**
+1. Program Files\SystemInformer\
+2. Program Files (x86)\SystemInformer\
+3. PATH environment variable (via `where` command)
+4. bin\SystemInformer\ (downloaded/cached)
+
+**Download Details:**
+- GitHub API: `https://api.github.com/repos/winsiderss/systeminformer/releases/latest`
+- Downloads portable ZIP: `systeminformer-X.X.XXXXX-release-bin.zip` (~23 MB)
+- Extracts to bin\SystemInformer\
+- Unblocks all files recursively
+- Searches for SystemInformer64.exe, SystemInformer.exe, or SystemInformer32.exe
+
+**Installation location:**
+- bin\SystemInformer\ (entire folder structure from ZIP)
+
+**Workflow:**
+1. Called when MPRESS is detected by PE analysis
+2. Shows OK/Cancel dialog explaining MPRESS requires memory dumping
+3. If OK: checks if System Informer exists (system-wide or cached)
+4. Downloads and installs if not found
+5. Launches MPRESS executable first (so it's running in memory)
+6. Launches System Informer (so user can dump the running process)
+7. Control returns to Parse-MemoryDump.ahk for memory dump instructions
+
+**Important Notes:**
+- Prefers existing System Informer installation over downloading
+- No admin rights required (portable version)
+- Automatically starts both processes for user convenience
+- Works alongside Parse-MemoryDump.ahk for complete MPRESS workflow
 
 ### lib/Launch-MyAutToExe.ahk
 Automatic decompilation fallback for very old AutoHotkey executables (v1.0.48.5 and earlier):
@@ -222,7 +264,7 @@ AHK-Hacker uses comprehensive PE header analysis to detect packers and validate 
 1. PE analysis validates file structure and detects packers
 2. Manifest check confirms AHK compilation
 3. UPX files → unpack → extract RCData
-4. MPRESS files → offer mATE (no unpacking available)
+4. MPRESS files → launch System Informer → guide memory dumping → parse .bin file
 5. Clean files → direct RCData extraction
 
 ### Building

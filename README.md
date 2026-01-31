@@ -18,7 +18,7 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by d
 - **No admin rights needed** - Uses HKEY_CURRENT_USER registry
 - **Automatic packer detection** - Detects UPX and MPRESS packers
   - **UPX**: Automatically unpacks UPX-compressed executables
-  - **MPRESS**: Memory dump parser for MPRESS-packed executables (manual process)
+  - **MPRESS**: Automatically downloads System Informer and guides memory dump process
 
 ---
 
@@ -78,10 +78,12 @@ AHK-Hacker\
 ├── ahk\                             (Decompiled output - when source is read-only)
 ├── bin\                             (Runtime binaries - downloaded on-demand)
 │   ├── mATE\                        (myAutToExe decompiler - downloaded if needed)
+│   ├── SystemInformer\              (System Informer portable - downloaded for MPRESS)
 │   └── upx.exe                      (UPX unpacker - downloaded if needed)
 ├── lib\                             (Shared libraries)
 │   ├── Install-ContextMenu.ahk      (Installs right-click menu)
 │   ├── Launch-MyAutToExe.ahk        (Downloads mATE for very old AHK decompilation)
+│   ├── Launch-SystemInformer.ahk    (Downloads System Informer for MPRESS memory dumping)
 │   ├── Notifications.ahk            (Notification library)
 │   ├── Parse-MemoryDump.ahk         (Parses .bin memory dumps from MPRESS executables)
 │   ├── PE-Analysis.ahk              (PE analysis, packer detection, RCData extraction)
@@ -108,6 +110,7 @@ This will automatically:
 - Remove the context menu integration
 - Delete downloaded UPX unpacker from `bin\` folder
 - Delete downloaded mATE decompiler from `bin\mATE\` folder
+- Delete downloaded System Informer from `bin\SystemInformer\` folder
 
 **Note:** The AHK-Hacker folder, log files, and ahk output folder are not deleted. You can manually delete the folder if you want to remove everything.
 
@@ -138,22 +141,29 @@ If you prefer to uninstall manually:
 
 ### MPRESS-Packed Executables (Advanced)
 
-**Note:** MPRESS cannot be automatically unpacked. When detected, AHK-Hacker will show instructions for manual memory dumping.
+**Note:** MPRESS cannot be automatically unpacked. When detected, AHK-Hacker will **automatically download System Informer** (if not already installed) and guide you through the memory dump process.
 
-**Required Steps:**
+**Automatic Workflow:**
 
-1. Run the MPRESS-packed .exe file (keep it running)
-2. Download [System Informer](https://systeminformer.sourceforge.io/) (free process analysis tool)
-3. In System Informer:
-   - Right-click the running process → **Properties**
-   - Go to the **Memory** tab
-   - Find the main module (usually starts at address **0x400000**)
-   - Right-click the memory region → **Save** → Save as `.bin` file
-4. Right-click the original .exe in Explorer → **"AHK-Hacker - Decompile"**
-5. Read the instructions in the dialog
-6. Press **OK** and select the `.bin` file you saved
+1. Right-click the MPRESS-packed .exe → **"AHK-Hacker - Decompile"**
+2. Click **OK** when prompted about MPRESS detection
+3. AHK-Hacker will:
+   - Download System Informer portable (if not already on your system)
+   - Launch System Informer
+   - Launch the MPRESS executable (so it's running in memory)
+4. Follow the instructions in the dialog:
+   - Find the process in System Informer
+   - Right-click → **Properties** → **Memory** tab
+   - **Memory - Options** → **Highlight executable pages** (recommended)
+   - Dump memory from address **0x400000**
+   - Save as `.bin` file
+5. Click **OK** and select the `.bin` file you saved
+6. AHK-Hacker will extract the script from the memory dump
 
-**Important:** The process must be running for the script to be loaded in memory. This is the only way to decompile MPRESS-packed AHK executables.
+**Important:**
+- System Informer is automatically downloaded if not found on your system
+- If you already have System Informer installed (Program Files), it will be used instead
+- The process must be running for the script to be loaded in memory
 
 ### Context menu doesn't appear
 
@@ -172,7 +182,7 @@ If you prefer to uninstall manually:
 
 - **Windows**: 10 or later
 - **AutoHotkey**: v2.0+ (for running helper scripts: Install/Uninstall etc...)
-- **Internet**: Required for downloading **UPX** / **mATE** (only when needed)
+- **Internet**: Required for downloading **UPX** / **System Informer** / **mATE** (only when needed)
 
 ---
 

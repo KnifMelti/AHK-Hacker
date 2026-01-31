@@ -4,12 +4,13 @@
 #Include lib/PE-Analysis.ahk
 #Include lib/Unpack-Exe.ahk
 #Include lib/Launch-MyAutToExe.ahk
+#Include lib/Launch-SystemInformer.ahk
 #Include lib/Parse-MemoryDump.ahk
 ;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.4.0.0
+;@Ahk2Exe-Set FileVersion, 3.5.0.0
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -129,8 +130,19 @@ FileAppend("Confidence: " . analysis["confidence"] . "%`r`n", logFile, "UTF-8-RA
 ; Handle MPRESS-packed files
 if (InStr(analysis["packer"], "MPRESS")) {
     FileAppend("`r`n===== MPRESS DETECTION =====`r`n", logFile, "UTF-8-RAW")
-    FileAppend("MPRESS packer detected - showing memory dump instructions`r`n", logFile, "UTF-8-RAW")
+    FileAppend("MPRESS packer detected - offering System Informer`r`n", logFile, "UTF-8-RAW")
 
+    ; Offer to launch System Informer (downloads if needed, starts SI + exe)
+    ; Returns object with {mpressPID: N, siPID: M}, or {mpressPID: 0, siPID: 0} if cancelled/failed
+    pids := OfferSystemInformer(exePath, logFile)
+
+    if (pids.mpressPID = 0) {
+        ; User cancelled or launch failed
+        FileAppend("User cancelled System Informer offer or launch failed`r`n", logFile, "UTF-8-RAW")
+        ExitApp(1)
+    }
+
+    ; System Informer and exe are now running (PIDs: mpressPID=" . pids.mpressPID . ", siPID=" . pids.siPID . ")
     ; Determine output directory (writable location)
     usedFallbackForMPRESS := false
     if (CanWriteToDirectory(fileDir)) {
@@ -144,10 +156,20 @@ if (InStr(analysis["packer"], "MPRESS")) {
         }
     }
 
-    ; Show instructions and parse memory dump (OK/Cancel dialog)
+    ; Show memory dump instructions and file picker
     if (ParseMemoryDump(exePath, workingDir, logFile)) {
         ; Parsing succeeded - show success notification
         ShowProgress("Script extracted successfully!", 0, "AHK-Hacker")
+
+        ; Close both processes now that we're done
+        try {
+            ProcessClose(pids.mpressPID)
+            FileAppend("Closed MPRESS process (PID: " . pids.mpressPID . ")`r`n", logFile, "UTF-8-RAW")
+        }
+        try {
+            ProcessClose(pids.siPID)
+            FileAppend("Closed System Informer (PID: " . pids.siPID . ")`r`n", logFile, "UTF-8-RAW")
+        }
 
         ; Open output folder if using fallback location
         if (usedFallbackForMPRESS) {
@@ -156,7 +178,15 @@ if (InStr(analysis["packer"], "MPRESS")) {
 
         ExitApp(0)
     } else {
-        ; User cancelled or parsing failed
+        ; User cancelled or parsing failed - cleanup both processes
+        try {
+            ProcessClose(pids.mpressPID)
+            FileAppend("User cancelled - closed MPRESS process (PID: " . pids.mpressPID . ")`r`n", logFile, "UTF-8-RAW")
+        }
+        try {
+            ProcessClose(pids.siPID)
+            FileAppend("User cancelled - closed System Informer (PID: " . pids.siPID . ")`r`n", logFile, "UTF-8-RAW")
+        }
         ExitApp(1)
     }
 }
