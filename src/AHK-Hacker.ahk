@@ -4,11 +4,12 @@
 #Include lib/PE-Analysis.ahk
 #Include lib/Unpack-Exe.ahk
 #Include lib/Launch-MyAutToExe.ahk
+#Include lib/Parse-MemoryDump.ahk
 ;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.3.0.1
+;@Ahk2Exe-Set FileVersion, 3.4.0.0
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -128,27 +129,35 @@ FileAppend("Confidence: " . analysis["confidence"] . "%`r`n", logFile, "UTF-8-RA
 ; Handle MPRESS-packed files
 if (InStr(analysis["packer"], "MPRESS")) {
     FileAppend("`r`n===== MPRESS DETECTION =====`r`n", logFile, "UTF-8-RAW")
-    FileAppend("MPRESS packer detected - offering mATE`r`n", logFile, "UTF-8-RAW")
+    FileAppend("MPRESS packer detected - showing memory dump instructions`r`n", logFile, "UTF-8-RAW")
 
-    ; Offer mATE for MPRESS-packed AHK files
-    ; Check if directory is writable
+    ; Determine output directory (writable location)
+    usedFallbackForMPRESS := false
     if (CanWriteToDirectory(fileDir)) {
-        OfferMyAutToExe(exePath)
-        ExitApp(1)
+        workingDir := fileDir
     } else {
-        ; Directory is read-only - pass fallback folder
-        ahkFolder := installDir . "\ahk"
-        if (!FileExist(ahkFolder)) {
-            DirCreate(ahkFolder)
+        ; Directory is read-only - use fallback folder
+        workingDir := installDir . "\ahk"
+        usedFallbackForMPRESS := true
+        if (!FileExist(workingDir)) {
+            DirCreate(workingDir)
         }
-        monitoring := OfferMyAutToExe(exePath, ahkFolder)
-        if (monitoring) {
-            ; mATE finished, cleanup done, Explorer opened - just exit
-            ExitApp(0)
-        } else {
-            ; User declined or error - exit with error
-            ExitApp(1)
+    }
+
+    ; Show instructions and parse memory dump (OK/Cancel dialog)
+    if (ParseMemoryDump(exePath, workingDir, logFile)) {
+        ; Parsing succeeded - show success notification
+        ShowProgress("Script extracted successfully!", 0, "AHK-Hacker")
+
+        ; Open output folder if using fallback location
+        if (usedFallbackForMPRESS) {
+            Run('explorer.exe "' . workingDir . '"')
         }
+
+        ExitApp(0)
+    } else {
+        ; User cancelled or parsing failed
+        ExitApp(1)
     }
 }
 

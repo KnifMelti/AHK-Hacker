@@ -55,7 +55,7 @@ Main decompiler that:
 1. Receives .exe path from context menu argument
 2. Analyzes PE file for packer detection (UPX/MPRESS) via lib/PE-Analysis.ahk
 3. Validates AHK signature via manifest (RT_MANIFEST)
-4. If MPRESS → offers mATE GUI for manual decompilation
+4. If MPRESS → shows instructions and parses user-provided .bin memory dump
 5. If UPX → unpacks via UPX, then continues
 6. Extracts script data directly from RT_RCDATA resources via LoadLibrary
 7. Tries multiple resource IDs (1, 2, 3, 4, 5, 10, 100, 101, 102, 1000)
@@ -129,6 +129,39 @@ Unpacker library that automatically handles UPX-compressed executables:
 5. AHK-Hacker.ahk retries RCData extraction on unpacked file
 6. Temporary file is cleaned up after decompilation
 
+### lib/Parse-MemoryDump.ahk
+Memory dump parser for MPRESS-packed executables that allows manual .bin file input:
+- **ParseMemoryDump(exePath, outputDir, logFile)** - Main entry point with OK/Cancel dialog and file picker
+- **FindScriptInBinary(binPath, logFile)** - Searches for "; <COMPILER:" signature in UTF-16 LE, UTF-8, and CP0 encodings
+- **ExtractScriptFromOffset(binPath, offset, encoding, logFile)** - Extracts script from found offset (StrGet handles truncation at null bytes)
+- **SaveExtractedScript(scriptContent, exePath, outputDir, logFile)** - Normalizes line endings to CRLF and saves as UTF-8 without BOM
+
+**Binary Search Algorithm:**
+- UTF-16 LE: Searches for `3B 00 20 00 3C 00 43 00...` ("; <COMPILER:" with null bytes between chars)
+- UTF-8/CP0: Searches for `3B 20 3C 43 4F 4D 50...` ("; <COMPILER:" as raw ASCII)
+- Returns offset and detected encoding on success
+
+**File Validation:**
+- Minimum size: 1KB (1024 bytes)
+- Maximum size: 500MB (reasonable limit for memory dumps)
+- Content validation: Must start with "; <COMPILER:" signature
+- StrGet automatically stops at null bytes (no manual truncation needed)
+
+**Workflow:**
+1. Called directly when MPRESS is detected (no mATE fallback)
+2. Shows OK/Cancel dialog with System Informer instructions (address 0x400000)
+3. If OK: user selects .bin file via file picker
+4. Searches for AHK signature in multiple encodings
+5. Extracts script from offset (StrGet handles null byte termination)
+6. Normalizes line endings and saves as UTF-8 without BOM
+7. Opens Explorer to show decompiled output file
+
+**Important Notes:**
+- MPRESS-packed executables cannot be automatically unpacked (no tools available)
+- User must manually dump process memory using System Informer
+- Process must be running for script to be loaded in memory
+- mATE is NOT used for MPRESS files (mATE cannot handle MPRESS)
+
 ### lib/Launch-MyAutToExe.ahk
 Automatic decompilation fallback for very old AutoHotkey executables (v1.0.48.5 and earlier):
 - **OfferMyAutToExe(exePath)** - Shows dialog offering to try myAutToExe decompilation
@@ -143,10 +176,11 @@ Automatic decompilation fallback for very old AutoHotkey executables (v1.0.48.5 
 - bin\mATE\ (extracted from mATE.zip)
 
 **Workflow:**
-1. Called when RCData extraction fails or MPRESS is detected
-2. Shows Yes/No dialog asking if user wants to try myAutToExe
-3. If Yes: ensures myAutToExe is installed (downloads if needed, with progress notifications)
+1. Called when RCData extraction fails for very old AHK executables
+2. Shows OK/Cancel dialog asking if user wants to try myAutToExe
+3. If OK: ensures myAutToExe is installed (downloads if needed, with progress notifications)
 4. Runs myAutToExe.exe GUI
+5. NOT used for MPRESS files (MPRESS uses Parse-MemoryDump.ahk instead)
 
 ### lib/Notifications.ahk
 Shared notification library that provides:
@@ -193,6 +227,12 @@ AHK-Hacker uses comprehensive PE header analysis to detect packers and validate 
 
 ### Building
 `AHK-Hacker.exe` is pre-compiled and digitally signed. The source `AHK-Hacker.ahk` is included for reference.
+
+**Build Process:**
+Version upgrades, compilation, and code signing are handled manually by the maintainer using the scripts in `src/res/`:
+- Version numbers are updated in source files as needed
+- `compile_and_sign.ps1` compiles AHK-Hacker.exe from AHK-Hacker.ahk
+- `sign_exe.ps1` applies digital signature to the compiled executable
 
 ### Testing
 1. Run `Install.ahk` (prompts OK/Cancel, then installs context menu)

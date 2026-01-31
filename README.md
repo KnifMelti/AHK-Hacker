@@ -17,8 +17,8 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by d
 - **Works anywhere** - Decompile files from any location `[R/O|R/W]`
 - **No admin rights needed** - Uses HKEY_CURRENT_USER registry
 - **Automatic packer detection** - Detects UPX and MPRESS packers
-  - **UPX**: Unpacks UPX-compressed executables
-  - **MPRESS**: Offers mATE decompiler for MPRESS-packed executables (for info...)
+  - **UPX**: Automatically unpacks UPX-compressed executables
+  - **MPRESS**: Memory dump parser for MPRESS-packed executables (manual process)
 
 ---
 
@@ -81,8 +81,9 @@ AHK-Hacker\
 │   └── upx.exe                      (UPX unpacker - downloaded if needed)
 ├── lib\                             (Shared libraries)
 │   ├── Install-ContextMenu.ahk      (Installs right-click menu)
-│   ├── Launch-MyAutToExe.ahk        (Downloads mATE for old/MPRESS AHK decompilation)
+│   ├── Launch-MyAutToExe.ahk        (Downloads mATE for very old AHK decompilation)
 │   ├── Notifications.ahk            (Notification library)
+│   ├── Parse-MemoryDump.ahk         (Parses .bin memory dumps from MPRESS executables)
 │   ├── PE-Analysis.ahk              (PE analysis, packer detection, RCData extraction)
 │   ├── Uninstall-ContextMenu.ahk    (Uninstalls right-click menu)
 │   └── Unpack-Exe.ahk               (Downloads UPX unpacker for packed executables)
@@ -129,11 +130,30 @@ If you prefer to uninstall manually:
 **Possible causes:**
 - The file is not an AutoHotkey compiled executable
 - The executable is protected/encrypted (e.g., Themida, Enigma)
-- The executable is very old (try the mATE decompiler option)
+- The executable is very old (try the myAutToExe decompiler fallback)
 - The executable is corrupted
 - Not enough disk space
 
-**Note:** UPX-packed executables are automatically detected and unpacked. MPRESS-packed files will offer the mATE decompiler automatically.
+**Note:** UPX-packed executables are automatically detected and unpacked. MPRESS-packed files require manual memory dumping (see below).
+
+### MPRESS-Packed Executables (Advanced)
+
+**Note:** MPRESS cannot be automatically unpacked. When detected, AHK-Hacker will show instructions for manual memory dumping.
+
+**Required Steps:**
+
+1. Run the MPRESS-packed .exe file (keep it running)
+2. Download [System Informer](https://systeminformer.sourceforge.io/) (free process analysis tool)
+3. In System Informer:
+   - Right-click the running process → **Properties**
+   - Go to the **Memory** tab
+   - Find the main module (usually starts at address **0x400000**)
+   - Right-click the memory region → **Save** → Save as `.bin` file
+4. Right-click the original .exe in Explorer → **"AHK-Hacker - Decompile"**
+5. Read the instructions in the dialog
+6. Press **OK** and select the `.bin` file you saved
+
+**Important:** The process must be running for the script to be loaded in memory. This is the only way to decompile MPRESS-packed AHK executables.
 
 ### Context menu doesn't appear
 
@@ -172,8 +192,8 @@ Works with compiled scripts from:
 - AutoHotkey v2.x (all versions)
 
 **Packer Support:**
-- **UPX-packed**: Automatically detected and unpacked
-- **MPRESS-packed**: Automatically detected, mATE decompiler offered
+- **UPX-packed**: Automatically detected and unpacked via UPX tool
+- **MPRESS-packed**: Automatically detected, requires manual memory dump parsing
 
 ---
 
@@ -183,6 +203,7 @@ Works with compiled scripts from:
 - **AutoHotkey** - Powerful. Easy to learn: [The ultimate automation scripting language for Windows.](https://www.autohotkey.com/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+- **System Informer** - [Free and open-source process analysis tool](https://systeminformer.sourceforge.io/)
 
 
 

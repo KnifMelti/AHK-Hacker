@@ -22,9 +22,9 @@ global SilentMode := false
  */
 OfferMyAutToExe(exePath, writableDir := "") {
     ; Show dialog asking if user wants to try myAutToExe
-    result := MsgBox("Failed to decompile automatically.`n`nThis may be a very old AutoHotkey executable (v1.0.48.5 or earlier).`n`nWould you like to try myAutToExe decompiler?", "AHK-Hacker", "YesNo Icon! 48")
+    result := MsgBox("Failed to decompile automatically.`n`nThis may be a very old AutoHotkey executable (v1.0.48.5 or earlier).`n`nPress OK to try myAutToExe decompiler.`nPress Cancel (or ESC) to exit.", "AHK-Hacker", "OKCancel Icon! 48")
 
-    if (result = "No") {
+    if (result = "Cancel") {
         ; User declined - exit
         return false
     }
