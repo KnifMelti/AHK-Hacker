@@ -8,7 +8,8 @@ AutoHotkey Decompiler with Windows Context Menu Integration
 
 ## Overview
 
-AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by directly reading the embedded RCDATA resource via Windows LoadLibrary API. Simply right-click any .exe file and select "AHK-Hacker - Decompile".
+AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by directly reading the embedded RCDATA resource via Windows LoadLibrary API.<br>
+Simply right-click any .exe file and select "AHK-Hacker - Decompile".
 
 ### Features
 
@@ -17,15 +18,16 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by d
 - **Automatic file naming** - Output as `filename_decompiled.ahk`
 - **Works anywhere** - Decompile files from any location `[R/O|R/W]`
 - **No admin rights needed** - Uses HKEY_CURRENT_USER registry
-- **Automatic packer detection** - Detects UPX and MPRESS packers
-  - **UPX**: Automatically unpacks UPX-compressed executables
-  - **MPRESS**: Automatically extracts via Windows ReadProcessMemory API
+- **Automatic packer detection** - Detects UPX and MPRESS packers:
+  - **UPX**: Unpacks UPX-compressed executables
+  - **MPRESS**: Extracts via Windows ReadProcessMemory API
 
 ---
 
 ## Installation
 
-> **Note:** AutoHotkey v2.0+ must be installed to run the helper scripts (.ahk files). Download from https://www.autohotkey.com
+> **Note:** AutoHotkey v2.0+ must be installed to run the helper scripts (.ahk files)<br>
+Download from https://www.autohotkey.com
 
 ### Recommended: Automated Install
 
@@ -144,8 +146,6 @@ If you prefer to uninstall manually:
 - The executable is corrupted
 - Not enough disk space
 
-**Note:** Both UPX and MPRESS-packed executables are automatically detected and decompiled, see [CLAUDE.md](https://github.com/KnifMelti/AHK-Hacker/blob/main/CLAUDE.md#libautomated-memoryreadahk) for details about MPRESS.
-
 ### Context menu doesn't appear
 
 **Solutions:**
@@ -185,6 +185,7 @@ Works with compiled scripts from:
 **Packer Support:**
 - **UPX-packed**: Automatically detected and unpacked via UPX tool
 - **MPRESS-packed**: Automatically detected and extracted via ReadProcessMemory API
+- [CLAUDE.md](https://github.com/KnifMelti/AHK-Hacker/blob/main/CLAUDE.md) for details
 
 ---
 
@@ -194,6 +195,7 @@ Works with compiled scripts from:
 - **AutoHotkey** - Powerful. Easy to learn: [The ultimate automation scripting language for Windows.](https://www.autohotkey.com/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
