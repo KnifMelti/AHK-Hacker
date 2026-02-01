@@ -10,8 +10,6 @@ AutoHotkey Decompiler with Windows Context Menu Integration
 
 AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by directly reading the embedded RCDATA resource via Windows LoadLibrary API. Simply right-click any .exe file and select "AHK-Hacker - Decompile".
 
-Alternatively, you can drag any `.exe` onto `AHK-Hacker.exe` to decompile — this works even if AutoHotkey is not installed.
-
 ### Features
 
 - **One-click decompilation** - Right-click context menu integration
@@ -146,24 +144,7 @@ If you prefer to uninstall manually:
 - The executable is corrupted
 - Not enough disk space
 
-**Note:** Both UPX and MPRESS-packed executables are automatically detected and decompiled.
-
-### MPRESS-Packed Executables
-
-**Automatic Extraction:** MPRESS-packed executables are automatically decompiled using Windows ReadProcessMemory API.
-
-**How it works:**
-
-1. Right-click the MPRESS-packed .exe → **"AHK-Hacker - Decompile"**
-2. Click **OK** when prompted about MPRESS detection
-3. AHK-Hacker will:
-   - Start the MPRESS executable (runs in memory for ~3 seconds)
-   - Read process memory from base address 0x400000 via Windows API
-   - Search for the AHK script signature ("; <COMPILER:")
-   - Extract and save the decompiled script automatically
-   - Close the process
-
-**No manual steps required** - the entire process is fully automated!
+**Note:** Both UPX and MPRESS-packed executables are automatically detected and decompiled, see [CLAUDE.md](https://github.com/KnifMelti/AHK-Hacker/blob/main/CLAUDE.md#libautomated-memoryreadahk) for details about MPRESS.
 
 ### Context menu doesn't appear
 
@@ -213,6 +194,7 @@ Works with compiled scripts from:
 - **AutoHotkey** - Powerful. Easy to learn: [The ultimate automation scripting language for Windows.](https://www.autohotkey.com/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
