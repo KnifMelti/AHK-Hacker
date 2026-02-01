@@ -11,7 +11,7 @@
 ; ====================================================================
 
 ; Show uninstallation prompt with OK/Cancel
-result := MsgBox("AHK-Hacker Uninstallation`n=========================`n`nThis will:`n• Remove context menu integration`n• Delete downloaded UPX unpacker`n• Delete downloaded mATE decompiler`n• Delete downloaded System Informer`n• Keep log files and ahk output folder`n`nDo you want to continue?", "AHK-Hacker Uninstallation", "OKCancel 48")
+result := MsgBox("AHK-Hacker Uninstallation`n=========================`n`nThis will:`n• Remove context menu integration`n• Delete downloaded UPX unpacker`n• Delete downloaded mATE decompiler`n• Keep log files and ahk output folder`n`nDo you want to continue?", "AHK-Hacker Uninstallation", "OKCancel 48")
 if (result = "Cancel") {
     ExitApp(0)
 }
@@ -55,13 +55,6 @@ if (FileExist(binDir)) {
 
     ; Delete downloaded mATE decompiler
     try DirDelete(binDir . "\mATE", true)
-
-    ; Delete downloaded System Informer
-    try DirDelete(binDir . "\SystemInformer", true)
-
-    ; Clean up any leftover System Informer temp files
-    try FileDelete(binDir . "\systeminformer_temp.zip")
-    try DirDelete(binDir . "\systeminformer_temp_extract", true)
 }
 
 ; ====================================================================

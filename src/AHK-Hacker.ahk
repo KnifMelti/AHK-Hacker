@@ -4,13 +4,12 @@
 #Include lib/PE-Analysis.ahk
 #Include lib/Unpack-Exe.ahk
 #Include lib/Launch-MyAutToExe.ahk
-#Include lib/Launch-SystemInformer.ahk
-#Include lib/Parse-MemoryDump.ahk
+#Include lib/Automated-MemoryRead.ahk
 ;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.5.0.0
+;@Ahk2Exe-Set FileVersion, 3.5.5.0
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -130,20 +129,9 @@ FileAppend("Confidence: " . analysis["confidence"] . "%`r`n", logFile, "UTF-8-RA
 ; Handle MPRESS-packed files
 if (InStr(analysis["packer"], "MPRESS")) {
     FileAppend("`r`n===== MPRESS DETECTION =====`r`n", logFile, "UTF-8-RAW")
-    FileAppend("MPRESS packer detected - offering System Informer`r`n", logFile, "UTF-8-RAW")
+    FileAppend("MPRESS packer detected - attempting automated extraction`r`n", logFile, "UTF-8-RAW")
 
-    ; Offer to launch System Informer (downloads if needed, starts SI + exe)
-    ; Returns object with {mpressPID: N, siPID: M}, or {mpressPID: 0, siPID: 0} if cancelled/failed
-    pids := OfferSystemInformer(exePath, logFile)
-
-    if (pids.mpressPID = 0) {
-        ; User cancelled or launch failed
-        FileAppend("User cancelled System Informer offer or launch failed`r`n", logFile, "UTF-8-RAW")
-        ExitApp(1)
-    }
-
-    ; System Informer and exe are now running (PIDs: mpressPID=" . pids.mpressPID . ", siPID=" . pids.siPID . ")
-    ; Determine output directory (writable location)
+    ; Determine output directory (writable location) before attempting extraction
     usedFallbackForMPRESS := false
     if (CanWriteToDirectory(fileDir)) {
         workingDir := fileDir
@@ -156,19 +144,70 @@ if (InStr(analysis["packer"], "MPRESS")) {
         }
     }
 
-    ; Show memory dump instructions and file picker
-    if (ParseMemoryDump(exePath, workingDir, logFile)) {
-        ; Parsing succeeded - show success notification
+    ; Show OK/Cancel dialog before starting executable
+    dialogText := "MPRESS-Packed Executable Detected`n`n"
+    dialogText .= "AHK-Hacker will attempt automated extraction by:`n"
+    dialogText .= "1. Starting the executable`n"
+    dialogText .= "2. Reading process memory via Windows API`n"
+    dialogText .= "3. Extracting the script automatically`n`n"
+    dialogText .= "Press OK to continue.`n"
+    dialogText .= "Press Cancel (or ESC) to exit."
+
+    result := MsgBox(dialogText, "AHK-Hacker - MPRESS Detection", "OKCancel Icon! 48")
+
+    if (result = "Cancel") {
+        FileAppend("User cancelled MPRESS extraction`r`n", logFile, "UTF-8-RAW")
+        ExitApp(1)
+    }
+
+    ; User approved - start executable and attempt automated memory reading
+    ShowProgress("Starting executable for memory extraction...", 1, "AHK-Hacker")
+    FileAppend("Starting MPRESS executable: " . exePath . "`r`n", logFile, "UTF-8-RAW")
+
+    ; Start the MPRESS executable
+    mpressPID := 0
+    try {
+        mpressPID := Run(exePath)
+        FileAppend("MPRESS Run() returned PID: " . mpressPID . "`r`n", logFile, "UTF-8-RAW")
+    } catch Error as e {
+        FileAppend("MPRESS Run() threw error: " . e.Message . "`r`n", logFile, "UTF-8-RAW")
+        mpressPID := 0
+    }
+
+    ; Verify process is running
+    SplitPath(exePath, &processName)
+    Sleep(1000)
+
+    if (!mpressPID || !IsNumber(mpressPID) || mpressPID = 0) {
+        FileAppend("Run() returned invalid PID, searching with ProcessExist...`r`n", logFile, "UTF-8-RAW")
+        mpressPID := ProcessExist(processName)
+        FileAppend("ProcessExist(" . processName . ") returned: " . mpressPID . "`r`n", logFile, "UTF-8-RAW")
+    }
+
+    actualPID := ProcessExist(processName)
+
+    if (actualPID = 0) {
+        ; Process failed to start or immediately exited
+        FileAppend("ERROR: Failed to start process or process immediately exited`r`n", logFile, "UTF-8-RAW")
+        ShowProgress("Cannot execute file - not a valid executable", 3, "AHK-Hacker Error")
+        ExitApp(1)
+    } else if (actualPID != mpressPID && mpressPID > 0) {
+        FileAppend("Note: ProcessExist found different PID: " . actualPID . " (Run returned " . mpressPID . ")`r`n", logFile, "UTF-8-RAW")
+        mpressPID := actualPID
+    } else {
+        mpressPID := actualPID
+    }
+
+    FileAppend("MPRESS exe running with PID: " . mpressPID . "`r`n", logFile, "UTF-8-RAW")
+
+    ; Attempt automated memory reading
+    if (TryAutomatedMemoryRead(exePath, mpressPID, workingDir, logFile)) {
+        ; Success! - Close process and show success
         ShowProgress("Script extracted successfully!", 0, "AHK-Hacker")
 
-        ; Close both processes now that we're done
         try {
-            ProcessClose(pids.mpressPID)
-            FileAppend("Closed MPRESS process (PID: " . pids.mpressPID . ")`r`n", logFile, "UTF-8-RAW")
-        }
-        try {
-            ProcessClose(pids.siPID)
-            FileAppend("Closed System Informer (PID: " . pids.siPID . ")`r`n", logFile, "UTF-8-RAW")
+            ProcessClose(mpressPID)
+            FileAppend("Closed MPRESS process (PID: " . mpressPID . ")`r`n", logFile, "UTF-8-RAW")
         }
 
         ; Open output folder if using fallback location
@@ -177,18 +216,21 @@ if (InStr(analysis["packer"], "MPRESS")) {
         }
 
         ExitApp(0)
-    } else {
-        ; User cancelled or parsing failed - cleanup both processes
-        try {
-            ProcessClose(pids.mpressPID)
-            FileAppend("User cancelled - closed MPRESS process (PID: " . pids.mpressPID . ")`r`n", logFile, "UTF-8-RAW")
-        }
-        try {
-            ProcessClose(pids.siPID)
-            FileAppend("User cancelled - closed System Informer (PID: " . pids.siPID . ")`r`n", logFile, "UTF-8-RAW")
-        }
-        ExitApp(1)
     }
+
+    ; Automated extraction failed - cleanup and exit
+    FileAppend("Automated extraction failed`r`n", logFile, "UTF-8-RAW")
+    ShowProgress("Failed to extract script from memory", 3, "AHK-Hacker Error")
+
+    ; Close the process
+    try {
+        ProcessClose(mpressPID)
+        FileAppend("Closed MPRESS process (PID: " . mpressPID . ")`r`n", logFile, "UTF-8-RAW")
+    }
+
+    ; Show error message with log location
+    MsgBox("Automated memory extraction failed.`n`nPossible causes:`n- Script signature not found in memory`n- Insufficient permissions`n- Invalid memory layout`n`nCheck log file for details: " . logFile, "AHK-Hacker - Extraction Failed", "Icon! 16")
+    ExitApp(1)
 }
 
 ; ====================================================================

@@ -10,7 +10,9 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by d
 
 - **Language**: AutoHotkey v2.0
 - **Platform**: Windows 10+
-- **Native APIs**: Windows LoadLibrary for PE resource extraction
+- **Native APIs**:
+  - Windows LoadLibrary for PE resource extraction
+  - Windows ReadProcessMemory for MPRESS memory extraction
 
 ## File Structure
 
@@ -23,15 +25,14 @@ AHK-Hacker\
 │   ├── ahk\                              (Decompiled output - git-ignored, when source is read-only)
 │   ├── bin\                              (Runtime binaries - git-ignored)
 │   │   ├── mATE\                         (myAutToExe - downloaded on-demand)
-│   │   ├── SystemInformer\               (System Informer portable - downloaded on-demand for MPRESS)
 │   │   └── upx.exe                       (Downloaded on-demand for unpacking)
 │   ├── lib\                              (Shared libraries - synced to GitHub)
+│   │   ├── Automated-MemoryRead.ahk      (Automated MPRESS extraction via ReadProcessMemory API)
 │   │   ├── Install-ContextMenu.ahk       (Installs right-click menu)
 │   │   ├── Launch-MyAutToExe.ahk         (Optional download of mATE for old AHK decompilation)
-│   │   ├── Launch-SystemInformer.ahk     (Downloads System Informer for MPRESS memory dumping)
 │   │   ├── Notifications.ahk             (Notification library)
-│   │   ├── Parse-MemoryDump.ahk          (Parses .bin memory dumps from MPRESS executables)
 │   │   ├── PE-Analysis.ahk               (PE analysis, packer detection, RCData extraction)
+│   │   ├── Script-Utils.ahk              (Shared script utilities - SaveExtractedScript)
 │   │   ├── Uninstall-ContextMenu.ahk     (Uninstalls right-click menu)
 │   │   └── Unpack-Exe.ahk                (Downloads UPX unpacker for packed executables)
 │   ├── log\                              (Decompilation logs - git-ignored)
@@ -58,7 +59,7 @@ Main decompiler that:
 1. Receives .exe path from context menu argument
 2. Analyzes PE file for packer detection (UPX/MPRESS) via lib/PE-Analysis.ahk
 3. Validates AHK signature via manifest (RT_MANIFEST)
-4. If MPRESS → offers System Informer download, launches SI + exe, guides memory dumping
+4. If MPRESS → automatically extracts via ReadProcessMemory API (lib/Automated-MemoryRead.ahk)
 5. If UPX → unpacks via UPX, then continues
 6. Extracts script data directly from RT_RCDATA resources via LoadLibrary
 7. Tries multiple resource IDs (1, 2, 3, 4, 5, 10, 100, 101, 102, 1000)
@@ -78,7 +79,7 @@ Installation script that:
 Uninstallation script that:
 1. Shows OK/Cancel dialog before starting uninstallation
 2. Runs lib/Uninstall-ContextMenu.ahk in silent mode to remove context menu
-3. Cleans up downloaded files from bin/ (upx.exe, mATE/, SystemInformer/)
+3. Cleans up downloaded files from bin/ (upx.exe, mATE/)
 4. Shows progress notifications via ShowProgress from lib/Notifications.ahk
 
 ### lib/PE-Analysis.ahk
@@ -132,77 +133,62 @@ Unpacker library that automatically handles UPX-compressed executables:
 5. AHK-Hacker.ahk retries RCData extraction on unpacked file
 6. Temporary file is cleaned up after decompilation
 
-### lib/Parse-MemoryDump.ahk
-Memory dump parser for MPRESS-packed executables that allows manual .bin file input:
-- **ParseMemoryDump(exePath, outputDir, logFile)** - Main entry point with OK/Cancel dialog and file picker
-- **FindScriptInBinary(binPath, logFile)** - Searches for "; <COMPILER:" signature in UTF-16 LE, UTF-8, and CP0 encodings
-- **ExtractScriptFromOffset(binPath, offset, encoding, logFile)** - Extracts script from found offset (StrGet handles truncation at null bytes)
-- **SaveExtractedScript(scriptContent, exePath, outputDir, logFile)** - Normalizes line endings to CRLF and saves as UTF-8 without BOM
+### lib/Automated-MemoryRead.ahk
+Automated memory extraction for MPRESS-packed executables via Windows ReadProcessMemory API:
+- **TryAutomatedMemoryRead(exePath, mpressPID, outputDir, logFile)** - Main entry point for automated MPRESS extraction
+- **FindScriptInBuffer(buf, bufSize, logFile)** - Searches for "; <COMPILER:" signature in memory buffer (UTF-16 LE, UTF-8, CP0)
+- **ExtractScriptFromBuffer(buf, bufSize, offset, encoding, logFile)** - Extracts script from found offset in buffer
+- Uses `SaveExtractedScript` from Script-Utils.ahk for saving output
+
+**Windows API Usage:**
+- `OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, 0, PID)` - Opens process with read permissions (0x0410)
+- `ReadProcessMemory(hProcess, 0x400000, buffer, 50MB, &bytesRead)` - Reads from base address
+- `CloseHandle(hProcess)` - Closes process handle
+- Accepts partial reads (Error 299 / ERROR_PARTIAL_COPY is normal)
+
+**Memory Reading Strategy:**
+- **Base Address:** 0x400000 (standard Windows PE base address)
+- **Read Size:** 50 MB (balances performance vs coverage)
+- **Process Load Delay:** 3 seconds after start to ensure script is loaded in memory
+- **Encodings:** UTF-16 LE (primary), UTF-8, CP0 (fallback)
+- **Signature:** "; <COMPILER:" (11 bytes in UTF-8, 22 bytes in UTF-16 LE)
 
 **Binary Search Algorithm:**
 - UTF-16 LE: Searches for `3B 00 20 00 3C 00 43 00...` ("; <COMPILER:" with null bytes between chars)
 - UTF-8/CP0: Searches for `3B 20 3C 43 4F 4D 50...` ("; <COMPILER:" as raw ASCII)
 - Returns offset and detected encoding on success
 
-**File Validation:**
-- Minimum size: 1KB (1024 bytes)
-- Maximum size: 500MB (reasonable limit for memory dumps)
-- Content validation: Must start with "; <COMPILER:" signature
-- StrGet automatically stops at null bytes (no manual truncation needed)
-
-**Workflow:**
-1. Called after System Informer and MPRESS exe are launched (via Launch-SystemInformer.ahk)
-2. Shows OK/Cancel dialog with memory dump instructions (address 0x400000)
-3. If OK: user selects .bin file via file picker
-4. Searches for AHK signature in multiple encodings
-5. Extracts script from offset (StrGet handles null byte termination)
-6. Normalizes line endings and saves as UTF-8 without BOM
-7. Opens Explorer to show decompiled output file
-
-**Important Notes:**
-- MPRESS-packed executables cannot be automatically unpacked (no tools available)
-- System Informer is automatically downloaded and launched (via Launch-SystemInformer.ahk)
-- Process must be running for script to be loaded in memory
-- mATE is NOT used for MPRESS files (mATE cannot handle MPRESS)
-
-### lib/Launch-SystemInformer.ahk
-System Informer launcher for MPRESS-packed executables:
-- **OfferSystemInformer(exePath, logFile)** - Shows dialog offering System Informer download and launch
-- **FindSystemInformer()** - Searches for System Informer in system locations (Program Files, PATH) and bin folder
-- **EnsureSystemInformerInstalled(logFile)** - Checks if System Informer exists, downloads if needed
-- **DownloadSystemInformer(logFile)** - Downloads portable System Informer from GitHub releases API
-- **LaunchSystemInformer(exePath, systemInformerPath, logFile)** - Launches both System Informer and MPRESS exe
-
-**System Informer Search Order:**
-1. Program Files\SystemInformer\
-2. Program Files (x86)\SystemInformer\
-3. PATH environment variable (via `where` command)
-4. bin\SystemInformer\ (downloaded/cached)
-
-**Download Details:**
-- GitHub API: `https://api.github.com/repos/winsiderss/systeminformer/releases/latest`
-- Downloads portable ZIP: `systeminformer-X.X.XXXXX-release-bin.zip` (~23 MB)
-- Extracts to bin\SystemInformer\
-- Unblocks all files recursively
-- Searches for SystemInformer64.exe, SystemInformer.exe, or SystemInformer32.exe
-
-**Installation location:**
-- bin\SystemInformer\ (entire folder structure from ZIP)
-
 **Workflow:**
 1. Called when MPRESS is detected by PE analysis
-2. Shows OK/Cancel dialog explaining MPRESS requires memory dumping
-3. If OK: checks if System Informer exists (system-wide or cached)
-4. Downloads and installs if not found
-5. Launches MPRESS executable first (so it's running in memory)
-6. Launches System Informer (so user can dump the running process)
-7. Control returns to Parse-MemoryDump.ahk for memory dump instructions
+2. Waits 3 seconds for process to fully load into memory
+3. Opens process with VM_READ permissions
+4. Reads memory from 0x400000 (accepts partial reads)
+5. Searches for AHK signature in multiple encodings
+6. Extracts script from offset (StrGet handles null byte termination)
+7. Saves via SaveExtractedScript (normalizes line endings, UTF-8 without BOM)
+8. Closes process handle
+
+**Error Handling:**
+- Returns false if process terminated before read
+- Returns false if OpenProcess fails (permissions, invalid PID)
+- Returns false if ReadProcessMemory reads 0 bytes
+- Returns false if signature not found in memory
+- Logs all operations comprehensively
 
 **Important Notes:**
-- Prefers existing System Informer installation over downloading
-- No admin rights required (portable version)
-- Automatically starts both processes for user convenience
-- Works alongside Parse-MemoryDump.ahk for complete MPRESS workflow
+- Fully automated - no user interaction required for memory dumping
+- Process is started by AHK-Hacker and runs for ~3 seconds
+- No external tools (System Informer) needed
+- mATE is NOT used for MPRESS files
+
+### lib/Script-Utils.ahk
+Shared utility functions for script handling:
+- **SaveExtractedScript(scriptContent, exePath, outputDir, logFile)** - Normalizes and saves extracted scripts
+  - Normalizes line endings to CRLF (Windows standard)
+  - Writes as UTF-8 without BOM
+  - Generates filename: `{exeBaseName}_decompiled.ahk`
+  - Returns true on success, false on failure
+- Used by both Automated-MemoryRead.ahk and PE-Analysis.ahk
 
 ### lib/Launch-MyAutToExe.ahk
 Automatic decompilation fallback for very old AutoHotkey executables (v1.0.48.5 and earlier):
@@ -222,7 +208,7 @@ Automatic decompilation fallback for very old AutoHotkey executables (v1.0.48.5 
 2. Shows OK/Cancel dialog asking if user wants to try myAutToExe
 3. If OK: ensures myAutToExe is installed (downloads if needed, with progress notifications)
 4. Runs myAutToExe.exe GUI
-5. NOT used for MPRESS files (MPRESS uses Parse-MemoryDump.ahk instead)
+5. NOT used for MPRESS files (MPRESS uses Automated-MemoryRead.ahk instead)
 
 ### lib/Notifications.ahk
 Shared notification library that provides:
@@ -264,7 +250,7 @@ AHK-Hacker uses comprehensive PE header analysis to detect packers and validate 
 1. PE analysis validates file structure and detects packers
 2. Manifest check confirms AHK compilation
 3. UPX files → unpack → extract RCData
-4. MPRESS files → launch System Informer → guide memory dumping → parse .bin file
+4. MPRESS files → start process → read memory via API → extract script
 5. Clean files → direct RCData extraction
 
 ### Building

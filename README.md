@@ -18,7 +18,7 @@ AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by d
 - **No admin rights needed** - Uses HKEY_CURRENT_USER registry
 - **Automatic packer detection** - Detects UPX and MPRESS packers
   - **UPX**: Automatically unpacks UPX-compressed executables
-  - **MPRESS**: Automatically downloads System Informer and guides memory dump process
+  - **MPRESS**: Automatically extracts via Windows ReadProcessMemory API
 
 ---
 
@@ -78,15 +78,14 @@ AHK-Hacker\
 ├── ahk\                             (Decompiled output - when source is read-only)
 ├── bin\                             (Runtime binaries - downloaded on-demand)
 │   ├── mATE\                        (myAutToExe decompiler - downloaded if needed)
-│   ├── SystemInformer\              (System Informer portable - downloaded for MPRESS)
 │   └── upx.exe                      (UPX unpacker - downloaded if needed)
 ├── lib\                             (Shared libraries)
+│   ├── Automated-MemoryRead.ahk     (Automated memory extraction via ReadProcessMemory API)
 │   ├── Install-ContextMenu.ahk      (Installs right-click menu)
 │   ├── Launch-MyAutToExe.ahk        (Downloads mATE for very old AHK decompilation)
-│   ├── Launch-SystemInformer.ahk    (Downloads System Informer for MPRESS memory dumping)
 │   ├── Notifications.ahk            (Notification library)
-│   ├── Parse-MemoryDump.ahk         (Parses .bin memory dumps from MPRESS executables)
 │   ├── PE-Analysis.ahk              (PE analysis, packer detection, RCData extraction)
+│   ├── Script-Utils.ahk             (Shared script utilities)
 │   ├── Uninstall-ContextMenu.ahk    (Uninstalls right-click menu)
 │   └── Unpack-Exe.ahk               (Downloads UPX unpacker for packed executables)
 ├── log\                             (Decompilation logs)
@@ -110,7 +109,6 @@ This will automatically:
 - Remove the context menu integration
 - Delete downloaded UPX unpacker from `bin\` folder
 - Delete downloaded mATE decompiler from `bin\mATE\` folder
-- Delete downloaded System Informer from `bin\SystemInformer\` folder
 
 **Note:** The AHK-Hacker folder, log files, and ahk output folder are not deleted. You can manually delete the folder if you want to remove everything.
 
@@ -137,33 +135,24 @@ If you prefer to uninstall manually:
 - The executable is corrupted
 - Not enough disk space
 
-**Note:** UPX-packed executables are automatically detected and unpacked. MPRESS-packed files require manual memory dumping (see below).
+**Note:** Both UPX and MPRESS-packed executables are automatically detected and decompiled.
 
-### MPRESS-Packed Executables (Advanced)
+### MPRESS-Packed Executables
 
-**Note:** MPRESS cannot be automatically unpacked. When detected, AHK-Hacker will **automatically download System Informer** (if not already installed) and guide you through the memory dump process.
+**Automatic Extraction:** MPRESS-packed executables are automatically decompiled using Windows ReadProcessMemory API.
 
-**Automatic Workflow:**
+**How it works:**
 
 1. Right-click the MPRESS-packed .exe → **"AHK-Hacker - Decompile"**
 2. Click **OK** when prompted about MPRESS detection
 3. AHK-Hacker will:
-   - Download System Informer portable (if not already on your system)
-   - Launch System Informer
-   - Launch the MPRESS executable (so it's running in memory)
-4. Follow the instructions in the dialog:
-   - Find the process in System Informer
-   - Right-click → **Properties** → **Memory** tab
-   - **Memory - Options** → **Highlight executable pages** (recommended)
-   - Dump memory from address **0x400000**
-   - Save as `.bin` file
-5. Click **OK** and select the `.bin` file you saved
-6. AHK-Hacker will extract the script from the memory dump
+   - Start the MPRESS executable (runs in memory for ~3 seconds)
+   - Read process memory from base address 0x400000 via Windows API
+   - Search for the AHK script signature ("; <COMPILER:")
+   - Extract and save the decompiled script automatically
+   - Close the process
 
-**Important:**
-- System Informer is automatically downloaded if not found on your system
-- If you already have System Informer installed (Program Files), it will be used instead
-- The process must be running for the script to be loaded in memory
+**No manual steps required** - the entire process is fully automated!
 
 ### Context menu doesn't appear
 
@@ -182,7 +171,7 @@ If you prefer to uninstall manually:
 
 - **Windows**: 10 or later
 - **AutoHotkey**: v2.0+ (for running helper scripts: Install/Uninstall etc...)
-- **Internet**: Required for downloading **UPX** / **System Informer** / **mATE** (only when needed)
+- **Internet**: Required for downloading **UPX** / **mATE** (only when needed)
 
 ---
 
@@ -203,7 +192,7 @@ Works with compiled scripts from:
 
 **Packer Support:**
 - **UPX-packed**: Automatically detected and unpacked via UPX tool
-- **MPRESS-packed**: Automatically detected, requires manual memory dump parsing
+- **MPRESS-packed**: Automatically detected and extracted via ReadProcessMemory API
 
 ---
 
@@ -213,7 +202,6 @@ Works with compiled scripts from:
 - **AutoHotkey** - Powerful. Easy to learn: [The ultimate automation scripting language for Windows.](https://www.autohotkey.com/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
-- **System Informer** - [Free and open-source process analysis tool](https://systeminformer.sourceforge.io/)
 
 
 
