@@ -89,10 +89,10 @@ AHK-Hacker\
 │   ├── Uninstall-ContextMenu.ahk    (Uninstalls right-click menu)
 │   └── Unpack-Exe.ahk               (Downloads UPX unpacker for packed executables)
 ├── log\                             (Decompilation logs)
+├── AH.ico                           (AHK-Hacker icon)
 ├── AHK-Hacker.ahk                   (Main decompiler script)
 ├── AHK-Hacker.exe                   (Compiled and signed executable)
 ├── Install.ahk                      (Installer - unblocks files etc...)
-├── AH.ico                           (AHK-Hacker icon)
 └── Uninstall.ahk                    (Uninstaller - removes context menu etc...)
 ```
 
@@ -202,6 +202,7 @@ Works with compiled scripts from:
 - **AutoHotkey** - Powerful. Easy to learn: [The ultimate automation scripting language for Windows.](https://www.autohotkey.com/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
