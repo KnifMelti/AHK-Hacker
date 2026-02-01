@@ -52,8 +52,18 @@ TryAutomatedMemoryRead(exePath, mpressPID, outputDir, logFile) {
 
     FileAppend("Process opened successfully (handle: " . hProcess . ")`r`n", logFile, "UTF-8-RAW")
 
-    ; Read 50 MB from base address 0x400000
-    baseAddress := 0x400000
+    ; Get module base address (works for both x86 and x64)
+    baseAddress := GetModuleBaseAddress(hProcess, logFile)
+
+    if (!baseAddress) {
+        DllCall("CloseHandle", "Ptr", hProcess)
+        FileAppend("Error: Failed to get module base address`r`n", logFile, "UTF-8-RAW")
+        ShowProgress("Cannot determine process base address", 3, "AHK-Hacker Error")
+        return false
+    }
+
+    FileAppend("Module base address: 0x" . Format("{:X}", baseAddress) . "`r`n", logFile, "UTF-8-RAW")
+
     readSize := 50 * 1024 * 1024  ; 50 MB
 
     FileAppend("Reading " . readSize . " bytes from address 0x" . Format("{:X}", baseAddress) . "...`r`n", logFile, "UTF-8-RAW")
@@ -126,6 +136,46 @@ TryAutomatedMemoryRead(exePath, mpressPID, outputDir, logFile) {
     }
 
     return success
+}
+
+/**
+ * GetModuleBaseAddress - Gets the base address of the main executable module
+ * @param hProcess - Process handle
+ * @param logFile - Path to log file
+ * @return Integer - Base address, or 0 on failure
+ */
+GetModuleBaseAddress(hProcess, logFile) {
+    ; EnumProcessModulesEx to get first module (main executable)
+    ; Works for both x86 and x64 processes
+
+    ; Get module handle
+    hMod := Buffer(A_PtrSize, 0)
+    cbNeeded := 0
+
+    ; LIST_MODULES_ALL = 0x03
+    result := DllCall("Psapi.dll\EnumProcessModulesEx",
+        "Ptr", hProcess,
+        "Ptr", hMod.Ptr,
+        "UInt", A_PtrSize,
+        "UInt*", &cbNeeded,
+        "UInt", 0x03,  ; LIST_MODULES_ALL
+        "Int")
+
+    if (!result) {
+        lastError := DllCall("GetLastError")
+        FileAppend("Error: EnumProcessModulesEx failed (Error code: " . lastError . ")`r`n", logFile, "UTF-8-RAW")
+        return 0
+    }
+
+    ; Get module base address (this IS the base address)
+    baseAddr := NumGet(hMod, 0, "Ptr")
+
+    if (!baseAddr) {
+        FileAppend("Error: Module base address is null`r`n", logFile, "UTF-8-RAW")
+        return 0
+    }
+
+    return baseAddr
 }
 
 /**
@@ -228,19 +278,18 @@ ExtractScriptFromBuffer(buf, bufSize, offset, encoding, logFile) {
 
     ; Convert to string based on encoding
     if (encoding = "UTF-16") {
-        ; UTF-16 LE: 2 bytes per character
-        charCount := readSize // 2
-        content := StrGet(buf.Ptr + offset, charCount, "UTF-16")
+        ; UTF-16 LE: use null-terminated string reading
+        content := StrGet(buf.Ptr + offset, "UTF-16")
     } else {
-        ; UTF-8 or CP0 - specify byte length
-        content := StrGet(buf.Ptr + offset, readSize, "UTF-8")
+        ; UTF-8 or CP0: use null-terminated string reading
+        content := StrGet(buf.Ptr + offset, "UTF-8")
         ; If UTF-8 fails, try CP0
         if (content = "" || !InStr(content, ";")) {
-            content := StrGet(buf.Ptr + offset, readSize, "CP0")
+            content := StrGet(buf.Ptr + offset, "CP0")
         }
     }
 
-    FileAppend("Extracted " . StrLen(content) . " characters`r`n", logFile, "UTF-8-RAW")
+    FileAppend("Extracted " . StrLen(content) . " characters (before cleanup)`r`n", logFile, "UTF-8-RAW")
 
     ; Validate extracted content starts with signature
     if (InStr(content, "; <COMPILER:") != 1) {
@@ -248,6 +297,70 @@ ExtractScriptFromBuffer(buf, bufSize, offset, encoding, logFile) {
         FileAppend("Content starts with: " . SubStr(content, 1, 50) . "`r`n", logFile, "UTF-8-RAW")
         return ""
     }
+
+    ; Cleanup: Remove trailing garbage data that may have been read beyond the actual script
+
+    ; Strategy 1: Remove trailing whitespace first
+    content := RTrim(content)
+
+    ; Strategy 2: Remove trailing control characters (except newlines)
+    while (content != "" && Ord(SubStr(content, -1)) < 32 && Ord(SubStr(content, -1)) != 10 && Ord(SubStr(content, -1)) != 13) {
+        content := SubStr(content, 1, -1)
+    }
+
+    ; Strategy 3: Detect and remove garbage characters at the end
+    ; Pattern: If last "word" contains only uppercase/mixed letters without spaces/newlines before it,
+    ; and appears to be trash appended to a valid AHK keyword
+    ; Example: "PausePA" where "PA" is trash appended to valid "Pause"
+
+    ; Split into lines and check last line
+    lines := StrSplit(content, "`n")
+    if (lines.Length > 0) {
+        lastLine := RTrim(lines[lines.Length], "`r")  ; Remove CR if present
+
+        ; Common AHK keywords that often appear at end of scripts
+        commonKeywords := ["Pause", "Exit", "ExitApp", "Return", "Break", "Continue",
+                         "Sleep", "Run", "Send", "Click", "Loop", "If", "Else",
+                         "MsgBox", "ToolTip", "Reload"]
+
+        ; Check each keyword to see if the line STARTS with it followed by trash
+        for keyword in commonKeywords {
+            keywordLen := StrLen(keyword)
+            lineLen := StrLen(lastLine)
+
+            ; If line is longer than keyword and starts with it
+            if (lineLen > keywordLen && SubStr(lastLine, 1, keywordLen) = keyword) {
+                ; Get what comes after the keyword
+                afterKeyword := SubStr(lastLine, keywordLen + 1)
+
+                ; If what follows is 1-3 uppercase/alphanumeric chars (likely trash), remove it
+                ; But allow spaces, quotes, parentheses (valid AHK syntax)
+                if (RegExMatch(afterKeyword, "^[A-Z]{1,3}$")) {
+                    FileAppend("Detected garbage '" . afterKeyword . "' after keyword '" . keyword . "', removing it`r`n", logFile, "UTF-8-RAW")
+
+                    ; Keep only the keyword
+                    lastLine := keyword
+                    lines[lines.Length] := lastLine
+
+                    ; Rejoin lines
+                    content := ""
+                    for index, line in lines {
+                        content .= line
+                        if (index < lines.Length) {
+                            content .= "`n"
+                        }
+                    }
+
+                    break  ; Found and fixed, exit loop
+                }
+            }
+        }
+    }
+
+    ; Final trim
+    content := RTrim(content)
+
+    FileAppend("Final extracted length: " . StrLen(content) . " characters`r`n", logFile, "UTF-8-RAW")
 
     return content
 }

@@ -136,18 +136,22 @@ Unpacker library that automatically handles UPX-compressed executables:
 ### lib/Automated-MemoryRead.ahk
 Automated memory extraction for MPRESS-packed executables via Windows ReadProcessMemory API:
 - **TryAutomatedMemoryRead(exePath, mpressPID, outputDir, logFile)** - Main entry point for automated MPRESS extraction
+- **GetModuleBaseAddress(hProcess, logFile)** - Dynamically gets module base address via EnumProcessModulesEx (supports x86 and x64)
 - **FindScriptInBuffer(buf, bufSize, logFile)** - Searches for "; <COMPILER:" signature in memory buffer (UTF-16 LE, UTF-8, CP0)
-- **ExtractScriptFromBuffer(buf, bufSize, offset, encoding, logFile)** - Extracts script from found offset in buffer
+- **ExtractScriptFromBuffer(buf, bufSize, offset, encoding, logFile)** - Extracts script from found offset in buffer with smart garbage cleanup
 - Uses `SaveExtractedScript` from Script-Utils.ahk for saving output
 
 **Windows API Usage:**
 - `OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, 0, PID)` - Opens process with read permissions (0x0410)
-- `ReadProcessMemory(hProcess, 0x400000, buffer, 50MB, &bytesRead)` - Reads from base address
+- `EnumProcessModulesEx(hProcess, hMod, size, &cbNeeded, LIST_MODULES_ALL)` - Gets module base address (x86: 0x400000, x64: 0x140000000+)
+- `ReadProcessMemory(hProcess, baseAddress, buffer, 50MB, &bytesRead)` - Reads from dynamic base address
 - `CloseHandle(hProcess)` - Closes process handle
 - Accepts partial reads (Error 299 / ERROR_PARTIAL_COPY is normal)
 
 **Memory Reading Strategy:**
-- **Base Address:** 0x400000 (standard Windows PE base address)
+- **Base Address:** Dynamically retrieved via EnumProcessModulesEx for both x86 and x64 architectures
+  - x86 processes: Typically 0x400000
+  - x64 processes: Typically 0x140000000 or higher (ASLR-randomized)
 - **Read Size:** 50 MB (balances performance vs coverage)
 - **Process Load Delay:** 3 seconds after start to ensure script is loaded in memory
 - **Encodings:** UTF-16 LE (primary), UTF-8, CP0 (fallback)
@@ -158,28 +162,45 @@ Automated memory extraction for MPRESS-packed executables via Windows ReadProces
 - UTF-8/CP0: Searches for `3B 20 3C 43 4F 4D 50...` ("; <COMPILER:" as raw ASCII)
 - Returns offset and detected encoding on success
 
+**Garbage Cleanup Strategy:**
+- **Strategy 1:** RTrim - removes trailing whitespace
+- **Strategy 2:** Control character removal - removes trailing control chars < ASCII 32 (except newlines)
+- **Strategy 3:** Keyword-based garbage detection - detects and removes trailing trash characters
+  - Identifies common AHK keywords (Pause, Exit, Return, etc.) at end of script
+  - Removes 1-3 uppercase letters appended without delimiter (e.g., "PausePA" → "Pause")
+  - Preserves valid syntax like spaces, quotes, parentheses
+
 **Workflow:**
 1. Called when MPRESS is detected by PE analysis
 2. Waits 3 seconds for process to fully load into memory
 3. Opens process with VM_READ permissions
-4. Reads memory from 0x400000 (accepts partial reads)
-5. Searches for AHK signature in multiple encodings
-6. Extracts script from offset (StrGet handles null byte termination)
-7. Saves via SaveExtractedScript (normalizes line endings, UTF-8 without BOM)
-8. Closes process handle
+4. Gets dynamic module base address via EnumProcessModulesEx
+5. Reads memory from base address (accepts partial reads)
+6. Searches for AHK signature in multiple encodings
+7. Extracts script from offset (StrGet handles null-terminated strings)
+8. Applies 3-stage cleanup to remove trailing garbage
+9. Saves via SaveExtractedScript (normalizes line endings, UTF-8 without BOM)
+10. Closes process handle
 
 **Error Handling:**
 - Returns false if process terminated before read
 - Returns false if OpenProcess fails (permissions, invalid PID)
+- Returns false if EnumProcessModulesEx fails (cannot determine base address)
 - Returns false if ReadProcessMemory reads 0 bytes
 - Returns false if signature not found in memory
 - Logs all operations comprehensively
+
+**Architecture Support:**
+- **x86 MPRESS**: Fully supported (AHK v1/v2 compilers)
+- **x64 MPRESS**: Fully supported (AHK v1/v2 compilers)
+- Dynamic base address detection ensures compatibility with both architectures
 
 **Important Notes:**
 - Fully automated - no user interaction required for memory dumping
 - Process is started by AHK-Hacker and runs for ~3 seconds
 - No external tools (System Informer) needed
 - mATE is NOT used for MPRESS files
+- Handles v2 compiler artifacts (trailing garbage characters) automatically
 
 ### lib/Script-Utils.ahk
 Shared utility functions for script handling:
