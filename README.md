@@ -10,9 +10,12 @@ AutoHotkey Decompiler with Windows Context Menu Integration
 
 AHK-Hacker extracts source code from compiled AutoHotkey executables (.exe) by directly reading the embedded RCDATA resource via Windows LoadLibrary API. Simply right-click any .exe file and select "AHK-Hacker - Decompile".
 
+Alternatively, you can drag any `.exe` onto `AHK-Hacker.exe` to decompile — this works even if AutoHotkey is not installed.
+
 ### Features
 
 - **One-click decompilation** - Right-click context menu integration
+- **Drag-and-drop support** - Drop `.exe` onto `AHK-Hacker.exe` (works without AutoHotkey)
 - **Automatic file naming** - Output as `filename_decompiled.ahk`
 - **Works anywhere** - Decompile files from any location `[R/O|R/W]`
 - **No admin rights needed** - Uses HKEY_CURRENT_USER registry
@@ -57,6 +60,14 @@ If you prefer to install manually:
 3. Wait a few seconds
 4. A notification will appear with the result
 5. The decompiled `.ahk` file will be in the **same folder** as the `.exe`
+
+### Drag-and-Drop (No AutoHotkey required)
+
+If you don't have AutoHotkey installed, you can use the compiled `AHK-Hacker.exe` directly:
+
+1. Drag the target `.exe` file onto `AHK-Hacker.exe`
+2. Wait a few seconds for processing
+3. The decompiled `.ahk` file is saved using the same output rules as above
 
 ### Example
 
