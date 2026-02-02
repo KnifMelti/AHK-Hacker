@@ -84,6 +84,8 @@ OfferMyAutToExe(exePath, writableDir := "") {
 
     ; Determine output path (same directory as working exe, with _decompiled.ahk)
     SplitPath(workingExePath, &fileName, &workingFileDir, &fileExt, &fileNameNoExt)
+    ; Normalize directory to avoid double backslashes (e.g., root directories like "D:\")
+    workingFileDir := RTrim(workingFileDir, "\")
     outputPath := workingFileDir . "\" . fileNameNoExt . "_decompiled.ahk"
 
     ; Notify user if using fallback location

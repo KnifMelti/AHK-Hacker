@@ -20,7 +20,9 @@
 SaveExtractedScript(scriptContent, exePath, outputDir, logFile) {
     ; Generate output filename
     SplitPath(exePath, , , , &exeBaseName)
-    outputFile := outputDir . "\" . exeBaseName . "_decompiled.ahk"
+    ; Normalize outputDir to avoid double backslashes (e.g., root directories like "D:\")
+    normalizedDir := RTrim(outputDir, "\")
+    outputFile := normalizedDir . "\" . exeBaseName . "_decompiled.ahk"
 
     try {
         ; Normalize line endings to CRLF (Windows standard)

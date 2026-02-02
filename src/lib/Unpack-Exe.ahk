@@ -26,6 +26,8 @@ TryUnpackExe(exePath, logFile, writableDir := "") {
     SplitPath(exePath, &fileName, &fileDir)
     timestamp := A_Now
     targetDir := (writableDir != "") ? writableDir : fileDir
+    ; Normalize directory to avoid double backslashes (e.g., root directories like "D:\")
+    targetDir := RTrim(targetDir, "\")
     unpackedPath := targetDir . "\" . fileName . ".unpacked." . timestamp . ".tmp"
 
     ; Append to log
@@ -99,6 +101,7 @@ FindUpx() {
 
     ; Get bin directory relative to AHK-Hacker.exe location
     SplitPath(A_ScriptFullPath, , &installDir)
+    installDir := RTrim(installDir, "\")
     searchPaths.Push(installDir . "\bin\upx.exe")
 
     ; Check each location
@@ -119,6 +122,7 @@ FindUpx() {
 DownloadUpx(logFile) {
     ; Get bin directory
     SplitPath(A_ScriptFullPath, , &installDir)
+    installDir := RTrim(installDir, "\")
     binDir := installDir . "\bin"
 
     ; Ensure bin directory exists

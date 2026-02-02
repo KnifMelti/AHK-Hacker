@@ -9,7 +9,7 @@
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.5.8.0
+;@Ahk2Exe-Set FileVersion, 3.5.8.1
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -125,6 +125,7 @@ if (!FileExist(exePath)) {
 
 ; Check that it's an .exe file
 SplitPath(exePath, &fileName, &fileDir, &fileExt)
+fileDir := RTrim(fileDir, "\")
 if (fileExt != "exe") {
     MsgBox("Not an executable file!`n`nOnly .exe files can be decompiled.", "AHK-Hacker Error", 16)
     ExitApp(1)
@@ -132,6 +133,7 @@ if (fileExt != "exe") {
 
 ; Get AHK-Hacker installation directory (needed for output path logic)
 SplitPath(A_ScriptFullPath, , &installDir)
+installDir := RTrim(installDir, "\")
 
 ; ====================================================================
 ; STEP 1.5: PE ANALYSIS
@@ -290,7 +292,9 @@ outputName := fileBaseName . "_decompiled"
 ; Determine writable output location
 if (CanWriteToDirectory(fileDir)) {
     ; Source directory is writable - use current behavior
-    outputPath := fileDir . "\" . outputName . ".ahk"
+    ; Normalize directory to avoid double backslashes
+    normalizedDir := RTrim(fileDir, "\")
+    outputPath := normalizedDir . "\" . outputName . ".ahk"
     usedFallbackFolder := false
 } else {
     ; Source directory is read-only - use fallback folder under AHK-Hacker installation
@@ -298,7 +302,9 @@ if (CanWriteToDirectory(fileDir)) {
     if (!FileExist(ahkFolder)) {
         DirCreate(ahkFolder)
     }
-    outputPath := ahkFolder . "\" . outputName . ".ahk"
+    ; Normalize directory to avoid double backslashes
+    normalizedDir := RTrim(ahkFolder, "\")
+    outputPath := normalizedDir . "\" . outputName . ".ahk"
     usedFallbackFolder := true
 }
 

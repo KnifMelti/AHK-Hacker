@@ -298,12 +298,15 @@ TryExtractResource(hMod, hRes, exePath, outputDir, outputFileName, &result) {
     ; Check if this resource contains the AHK script signature
     if InStr(content, "; <COMPILER:") = 1 {
         ; Extract to file - use provided filename or generate from exePath
+        ; Normalize outputDir to avoid double backslashes (e.g., root directories like "D:\")
+        normalizedDir := RTrim(outputDir, "\")
+
         if (outputFileName = "") {
             baseName := RegExReplace(exePath, ".*\\", "")
             baseName := RegExReplace(baseName, "\.[^.]+$", "")
-            outputFile := outputDir . "\\" . baseName . "_decompiled.ahk"
+            outputFile := normalizedDir . "\" . baseName . "_decompiled.ahk"
         } else {
-            outputFile := outputDir . "\\" . outputFileName
+            outputFile := normalizedDir . "\" . outputFileName
         }
 
         try {
