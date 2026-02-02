@@ -23,14 +23,10 @@ Simply right-click any .exe file and select "AHK-Hacker - Decompile".
 
 ---
 
-## Installation
-
-**No installation required!** Just extract and run.
-
 ### Quick Start
 
 1. Download the latest release zip from [Releases](https://github.com/KnifMelti/AHK-Hacker/releases)
-2. Extract the zip file anywhere you like
+2. Extract the zip anywhere. If Windows flags the file as downloaded, manually unblock: right‑click `AHK-Hacker.exe` → Properties → check **Unblock** → Apply
 3. **Run `AHK-Hacker.exe`** (or drag an `.exe` file onto it)
 
 **First-run auto-install:** The first time you run `AHK-Hacker.exe`, it will prompt to install the context menu integration:
@@ -38,6 +34,33 @@ Simply right-click any .exe file and select "AHK-Hacker - Decompile".
 - Click **Cancel** to skip → Continues with decompilation (prompts again next time)
 
 **Done!** No administrator privileges, AutoHotkey, or external downloads required.
+
+---
+
+
+## Installation
+
+### Using First-Run Prompt
+
+1. Run **AHK-Hacker.exe**
+2. When prompted, click **OK** to install the right-click context menu
+3. An uninstall shortcut (**Uninstall AHK-Hacker.lnk**) is created in the same folder
+
+### Using Command Line
+
+Install the context menu directly:
+```cmd
+AHK-Hacker.exe /install
+```
+
+Install silently (no prompts):
+```cmd
+AHK-Hacker.exe /install /silent
+```
+
+**Notes:**
+- No administrator privileges required; registry writes use `HKEY_CURRENT_USER`.
+- If Windows flags the executable as downloaded, manually unblock via Properties → **Unblock** before first run (see Quick Start step 2).
 
 ---
 

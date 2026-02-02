@@ -9,7 +9,7 @@
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.5.7.0
+;@Ahk2Exe-Set FileVersion, 3.5.8.0
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -71,12 +71,33 @@ if (A_Args.Length > 0) {
     }
 }
 
+; Check for /install parameter (optional with /silent for no prompts)
+if (A_Args.Length > 0) {
+    installRequested := false
+    for arg in A_Args {
+        if (arg = "/install" || arg = "-install") {
+            installRequested := true
+            break
+        }
+    }
+    if (installRequested) {
+        if (InstallContextMenu(A_ScriptFullPath)) {
+            CreateUninstallShortcut(A_ScriptFullPath, A_ScriptDir)
+            if (!SilentMode) {
+                ShowProgress("Context menu installed!", 0, "AHK-Hacker")
+            }
+            ExitApp(0)
+        } else {
+            ; Installation failed; exit with error (no UI in silent mode)
+            ExitApp(1)
+        }
+    }
+}
+
 ; Check if context menu is installed (prompt every time if not)
 if (!IsContextMenuInstalled()) {
     result := PromptInstallContextMenu()
     if (result = "OK") {
-        ; Unblock downloaded files first
-        UnblockDownloadedFiles()
         if (InstallContextMenu(A_ScriptFullPath)) {
             CreateUninstallShortcut(A_ScriptFullPath, A_ScriptDir)
             ShowProgress("Context menu installed! Continuing...", 0, "AHK-Hacker")
@@ -404,6 +425,7 @@ PromptInstallContextMenu() {
  */
 InstallContextMenu(exePath) {
     try {
+        global SilentMode
         RegWrite("AHK-Hacker - Decompile", "REG_SZ",
             "HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker")
 
@@ -415,8 +437,10 @@ InstallContextMenu(exePath) {
 
         return true
     } catch as err {
-        MsgBox("Error installing context menu: " . err.Message,
-            "AHK-Hacker", 16)
+        if (!SilentMode) {
+            MsgBox("Error installing context menu: " . err.Message,
+                "AHK-Hacker", 16)
+        }
         return false
     }
 }
@@ -429,6 +453,7 @@ InstallContextMenu(exePath) {
  */
 CreateUninstallShortcut(targetExePath, lnkDir) {
     try {
+        global SilentMode
         lnkPath := lnkDir . "\Uninstall AHK-Hacker.lnk"
         shell := ComObject("WScript.Shell")
         shortcut := shell.CreateShortcut(lnkPath)
@@ -440,8 +465,10 @@ CreateUninstallShortcut(targetExePath, lnkDir) {
         shortcut.Save()
         return true
     } catch as err {
-        MsgBox("Warning: Could not create shortcut`n" . err.Message,
-            "AHK-Hacker", 48)
+        if (!SilentMode) {
+            MsgBox("Warning: Could not create shortcut`n" . err.Message,
+                "AHK-Hacker", 48)
+        }
         return false
     }
 }
@@ -479,23 +506,5 @@ PerformUninstall() {
 
     if (registryRemoved || SilentMode) {
         ShowProgress("Context menu uninstalled!", 0, "AHK-Hacker")
-    }
-}
-
-/**
- * UnblockDownloadedFiles - Unblock all files in script directory using PowerShell
- * Removes the "Downloaded from Internet" flag that Windows adds to files
- * @return Boolean - true if successful, false on error
- */
-UnblockDownloadedFiles() {
-    try {
-        scriptDir := A_ScriptDir
-        ; Use PowerShell to unblock all files recursively
-        psCommand := 'Get-ChildItem -Path "' . scriptDir . '" -Recurse | Unblock-File'
-        RunWait('powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "' . psCommand . '"', , "Hide")
-        return true
-    } catch as err {
-        ; Non-critical error - files might not be blocked or PowerShell unavailable
-        return false
     }
 }
