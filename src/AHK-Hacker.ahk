@@ -9,7 +9,7 @@
 ;@Ahk2Exe-Set CompanyName, KnifMelti
 ;@Ahk2Exe-Set ProductName, AHK-Hacker
 ;@Ahk2Exe-Set FileDescription, AHK Context Menu Decompiler
-;@Ahk2Exe-Set FileVersion, 3.5.6.0
+;@Ahk2Exe-Set FileVersion, 3.5.7.0
 ;@Ahk2Exe-Set LegalCopyright, Copyright (C) 2026 KnifMelti
 ;@Ahk2Exe-Set LegalTrademarks, AHK-Hacker
 ;@Ahk2Exe-Set InternalName, AHK-Hacker
@@ -50,21 +50,44 @@ CanWriteToDirectory(dirPath) {
     }
 }
 
-; Get path from context menu (Windows sends "%1" as parameter)
-if (A_Args.Length = 0) {
-    MsgBox("No file specified!`n`nUsage: Drag .exe file or use from context menu.", "Error", 16)
-    ExitApp(1)
-}
-
-; Check for silent mode parameter
+; Check for silent mode parameter first (needed by PerformUninstall)
 global SilentMode := false
-if (A_Args.Length > 1) {
-    Loop A_Args.Length {
-        if (A_Args[A_Index] = "/silent" || A_Args[A_Index] = "-silent") {
+if (A_Args.Length > 0) {
+    for arg in A_Args {
+        if (arg = "/silent" || arg = "-silent") {
             SilentMode := true
             break
         }
     }
+}
+
+; Check for /uninstall parameter
+if (A_Args.Length > 0) {
+    for arg in A_Args {
+        if (arg = "/uninstall" || arg = "-uninstall") {
+            PerformUninstall()
+            ExitApp(0)
+        }
+    }
+}
+
+; Check if context menu is installed (prompt every time if not)
+if (!IsContextMenuInstalled()) {
+    result := PromptInstallContextMenu()
+    if (result = "OK") {
+        ; Unblock downloaded files first
+        UnblockDownloadedFiles()
+        if (InstallContextMenu(A_ScriptFullPath)) {
+            CreateUninstallShortcut(A_ScriptFullPath, A_ScriptDir)
+            ShowProgress("Context menu installed! Continuing...", 0, "AHK-Hacker")
+        }
+    }
+}
+
+; Get path from context menu (Windows sends "%1" as parameter)
+if (A_Args.Length = 0) {
+    MsgBox("No file specified!`n`nUsage: Drag .exe file or use from context menu.", "Error", 16)
+    ExitApp(1)
 }
 
 exePath := A_Args[1]
@@ -336,4 +359,143 @@ if (usedFallbackFolder) {
 } else {
     OfferMyAutToExe(exePath)
     ExitApp(1)
+}
+
+; ====================================================================
+; CONTEXT MENU INSTALLATION FUNCTIONS
+; ====================================================================
+
+/**
+ * IsContextMenuInstalled - Check if context menu is registered
+ * @return Boolean - true if installed, false otherwise
+ */
+IsContextMenuInstalled() {
+    try {
+        RegRead("HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker")
+        return true
+    } catch {
+        return false
+    }
+}
+
+/**
+ * PromptInstallContextMenu - Show installation prompt dialog
+ * @return String - "Yes" or "No" based on user choice
+ */
+PromptInstallContextMenu() {
+    result := MsgBox(
+        "Context Menu Not Installed`n"
+        "==========================`n`n"
+        "AHK-Hacker context menu is not installed.`n`n"
+        "Installation will:`n"
+        "• Register right-click menu for .exe files`n"
+        "• Create an uninstall shortcut in this folder`n`n"
+        "Install now?",
+        "AHK-Hacker",
+        1 + 32
+    )
+    return result
+}
+
+/**
+ * InstallContextMenu - Install context menu to registry
+ * @param exePath - Full path to AHK-Hacker.exe
+ * @return Boolean - true if successful, false on error
+ */
+InstallContextMenu(exePath) {
+    try {
+        RegWrite("AHK-Hacker - Decompile", "REG_SZ",
+            "HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker")
+
+        RegWrite(exePath . ",0", "REG_SZ",
+            "HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker", "Icon")
+
+        RegWrite('"' . exePath . '" "%1"', "REG_SZ",
+            "HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker\command")
+
+        return true
+    } catch as err {
+        MsgBox("Error installing context menu: " . err.Message,
+            "AHK-Hacker", 16)
+        return false
+    }
+}
+
+/**
+ * CreateUninstallShortcut - Create uninstall shortcut via COM
+ * @param targetExePath - Full path to AHK-Hacker.exe
+ * @param lnkDir - Directory to create shortcut in
+ * @return Boolean - true if successful, false on error
+ */
+CreateUninstallShortcut(targetExePath, lnkDir) {
+    try {
+        lnkPath := lnkDir . "\Uninstall AHK-Hacker.lnk"
+        shell := ComObject("WScript.Shell")
+        shortcut := shell.CreateShortcut(lnkPath)
+        shortcut.TargetPath := targetExePath
+        shortcut.Arguments := "/uninstall"
+        shortcut.WorkingDirectory := lnkDir
+        shortcut.Description := "Uninstall AHK-Hacker context menu integration"
+        shortcut.IconLocation := targetExePath . ",0"
+        shortcut.Save()
+        return true
+    } catch as err {
+        MsgBox("Warning: Could not create shortcut`n" . err.Message,
+            "AHK-Hacker", 48)
+        return false
+    }
+}
+
+/**
+ * PerformUninstall - Uninstall context menu and remove shortcut
+ */
+PerformUninstall() {
+    global SilentMode
+
+    if (!SilentMode) {
+        result := MsgBox(
+            "Uninstall AHK-Hacker?`n`n"
+            "This will remove the context menu integration.`n`n"
+            "Continue?",
+            "AHK-Hacker",
+            1 + 32
+        )
+        if (result = "Cancel")
+            return
+    }
+
+    registryRemoved := false
+    try {
+        RunWait('reg.exe delete "HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker" /f', , "Hide")
+        registryRemoved := true
+    } catch as err {
+        if (!SilentMode) {
+            MsgBox("Error removing registry: " . err.Message,
+                "AHK-Hacker", 16)
+        }
+    }
+
+    try FileDelete(A_ScriptDir . "\Uninstall AHK-Hacker.lnk")
+
+    if (registryRemoved || SilentMode) {
+        ShowProgress("Context menu uninstalled!", 0, "AHK-Hacker")
+    }
+}
+
+/**
+ * UnblockDownloadedFiles - Unblock all files in script directory using PowerShell
+ * Removes the "Downloaded from Internet" flag that Windows adds to files
+ * @return Boolean - true if successful, false on error
+ */
+UnblockDownloadedFiles() {
+    try {
+        scriptDir := A_ScriptDir
+        ; Use PowerShell to unblock all files recursively
+        psCommand := 'Get-ChildItem -Path "' . scriptDir . '" -Recurse | Unblock-File'
+        RunWait('powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "' . psCommand . '"', , "Hide")
+        return true
+    } catch as err {
+        ; Non-critical error - files might not be blocked or PowerShell unavailable
+        return false
+    }
 }

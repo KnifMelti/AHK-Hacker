@@ -1,4 +1,3 @@
-[![Windows Sandbox](https://img.shields.io/badge/AutoHotkey-Required-orange.svg)](https://www.autohotkey.com/)
 ![GitHub all releases](https://img.shields.io/github/downloads/KnifMelti/AHK-Hacker/total)
 <img src="https://github.com/KnifMelti/AHK-Hacker/blob/main/src/res/icon.png" alt="Icon" width="128" align="right"><br><br>
 
@@ -14,7 +13,7 @@ Simply right-click any .exe file and select "AHK-Hacker - Decompile".
 ### Features
 
 - **One-click decompilation** - Right-click context menu integration
-- **Drag-and-drop support** - Drop `.exe` onto `AHK-Hacker.exe` (works without AutoHotkey)
+- **Drag-and-drop support** - Drop `.exe` onto `AHK-Hacker.exe`
 - **Automatic file naming** - Output as `filename_decompiled.ahk`
 - **Works anywhere** - Decompile files from any location `[R/O|R/W]`
 - **No admin rights needed** - Uses HKEY_CURRENT_USER registry
@@ -26,28 +25,19 @@ Simply right-click any .exe file and select "AHK-Hacker - Decompile".
 
 ## Installation
 
-> **Note:** AutoHotkey v2.0+ must be installed to run the helper scripts (.ahk files)<br>
-Download from https://www.autohotkey.com
+**No installation required!** Just extract and run.
 
-### Recommended: Automated Install
+### Quick Start
 
 1. Download the latest release zip from [Releases](https://github.com/KnifMelti/AHK-Hacker/releases)
 2. Extract the zip file anywhere you like
-3. **Double-click `Install.ahk`**
-4. Click **OK** on the installation prompt (or Cancel to abort)
+3. **Run `AHK-Hacker.exe`** (or drag an `.exe` file onto it)
 
-This will automatically:
-- Unblock all files (removes Windows security warnings)
-- Install the context menu integration
+**First-run auto-install:** The first time you run `AHK-Hacker.exe`, it will prompt to install the context menu integration:
+- Click **OK** to install → Adds right-click menu + creates uninstall shortcut
+- Click **Cancel** to skip → Continues with decompilation (prompts again next time)
 
-**Done!** No administrator privileges or external downloads required.
-
-### Manual Install
-
-If you prefer to install manually:
-1. Unblock the downloaded `.zip` (right-click `.zip` → Properties → Unblock)
-2. Extract the zip file
-3. Run `lib\Install-ContextMenu.ahk` to add the context menu
+**Done!** No administrator privileges, AutoHotkey, or external downloads required.
 
 ---
 
@@ -61,9 +51,9 @@ If you prefer to install manually:
 4. A notification will appear with the result
 5. The decompiled `.ahk` file will be in the **same folder** as the `.exe`
 
-### Drag-and-Drop (No AutoHotkey required)
+### Drag-and-Drop
 
-If you don't have AutoHotkey installed, you can use the compiled `AHK-Hacker.exe` directly:
+You can also drag any `.exe` file onto `AHK-Hacker.exe`:
 
 1. Drag the target `.exe` file onto `AHK-Hacker.exe`
 2. Wait a few seconds for processing
@@ -90,44 +80,48 @@ AHK-Hacker\
 ├── bin\                             (Runtime binaries - downloaded on-demand)
 │   ├── mATE\                        (myAutToExe decompiler - downloaded if needed)
 │   └── upx.exe                      (UPX unpacker - downloaded if needed)
-├── lib\                             (Shared libraries)
+├── lib\                             (Shared libraries - source reference only)
 │   ├── Automated-MemoryRead.ahk     (Automated memory extraction via ReadProcessMemory API)
-│   ├── Install-ContextMenu.ahk      (Installs right-click menu)
 │   ├── Launch-MyAutToExe.ahk        (Downloads mATE for very old AHK decompilation)
 │   ├── Notifications.ahk            (Notification library)
 │   ├── PE-Analysis.ahk              (PE analysis, packer detection, RCData extraction)
 │   ├── Script-Utils.ahk             (Shared script utilities)
-│   ├── Uninstall-ContextMenu.ahk    (Uninstalls right-click menu)
 │   └── Unpack-Exe.ahk               (Downloads UPX unpacker for packed executables)
 ├── log\                             (Decompilation logs)
 ├── AH.ico                           (AHK-Hacker icon)
-├── AHK-Hacker.ahk                   (Main decompiler script)
-├── AHK-Hacker.exe                   (Compiled and signed executable)
-├── Install.ahk                      (Installer - unblocks files etc...)
-└── Uninstall.ahk                    (Uninstaller - removes context menu etc...)
+├── AHK-Hacker.ahk                   (Main decompiler script - source reference only)
+├── AHK-Hacker.exe                   (Compiled and signed executable - run this!)
+└── Uninstall AHK-Hacker.lnk         (Uninstall shortcut - created on first run)
 ```
+
+**Note:** Source files (`.ahk`) are included as reference only. You only need `AHK-Hacker.exe` to run the decompiler.
 
 ---
 
 ## Uninstallation
 
-### Recommended: Automated Uninstall
+### Using Uninstall Shortcut
 
-1. **Double-click `Uninstall.ahk`**
+1. **Double-click `Uninstall AHK-Hacker.lnk`** (created during installation)
 2. Click **OK** on the uninstallation prompt (or Cancel to abort)
 
 This will automatically:
 - Remove the context menu integration
-- Delete downloaded UPX unpacker from `bin\` folder
-- Delete downloaded mATE decompiler from `bin\mATE\` folder
+- Delete the uninstall shortcut itself
 
-**Note:** The AHK-Hacker folder, log files, and ahk output folder are not deleted. You can manually delete the folder if you want to remove everything.
+### Using Command Line
 
-### Manual Uninstall
+Alternatively, run from command line:
+```cmd
+AHK-Hacker.exe /uninstall
+```
 
-If you prefer to uninstall manually:
-1. Run `lib\Uninstall-ContextMenu.ahk` to remove the context menu
-2. Manually delete the `[AHK-Hacker folder]` folder if desired
+Or silently without prompts:
+```cmd
+AHK-Hacker.exe /uninstall /silent
+```
+
+**Note:** The AHK-Hacker folder, log files, bin folder, and ahk output folder are not deleted. You can manually delete the folder if you want to remove everything.
 
 ---
 
@@ -142,28 +136,18 @@ If you prefer to uninstall manually:
 **Possible causes:**
 - The file is not an AutoHotkey compiled executable
 - The executable is protected/encrypted (e.g., Themida, Enigma)
-- The executable is very old (try the myAutToExe decompiler fallback)
+- The executable is very old (will try the myAutToExe decompiler fallback)
 - The executable is corrupted
 - Not enough disk space
-
-### Context menu doesn't appear
-
-**Solutions:**
-1. Run `lib\Install-ContextMenu.ahk` again
-2. Restart Windows Explorer (Task Manager → Restart "Windows Explorer")
-3. Check Registry: `HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker`
-
-### Files are blocked / Security warnings
-
-**Solution:** Run `Install.ahk` - it automatically unblocks all files.
 
 ---
 
 ## Requirements
 
 - **Windows**: 10 or later
-- **AutoHotkey**: v2.0+ (for running helper scripts: Install/Uninstall etc...)
 - **Internet**: Required for downloading **UPX** / **mATE** (only when needed)
+
+**No AutoHotkey installation required!** The compiled `AHK-Hacker.exe` is self-contained.
 
 ---
 
@@ -185,7 +169,7 @@ Works with compiled scripts from:
 **Packer Support:**
 - **UPX-packed**: Automatically detected and unpacked via UPX tool
 - **MPRESS-packed**: Automatically detected and extracted via ReadProcessMemory API
-- [CLAUDE.md](https://github.com/KnifMelti/AHK-Hacker/blob/main/CLAUDE.md) for details
+- See [CLAUDE.md](https://github.com/KnifMelti/AHK-Hacker/blob/main/CLAUDE.md) for details
 
 ---
 

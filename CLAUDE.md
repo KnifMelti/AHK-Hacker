@@ -23,28 +23,25 @@ AHK-Hacker\
 │       └── release.yml                   (Release automation)
 ├── src\                                  (Source code)
 │   ├── ahk\                              (Decompiled output - git-ignored, when source is read-only)
-│   ├── bin\                              (Runtime binaries - git-ignored)
-│   │   ├── mATE\                         (myAutToExe - downloaded on-demand)
-│   │   └── upx.exe                       (Downloaded on-demand for unpacking)
-│   ├── lib\                              (Shared libraries - synced to GitHub)
+│   ├── bin\                              (Runtime binaries - git-ignored, downloaded on-demand)
+│   │   ├── mATE\                         (myAutToExe - downloaded if needed)
+│   │   └── upx.exe                       (Downloaded if needed)
+│   ├── lib\                              (Shared libraries - source reference only)
 │   │   ├── Automated-MemoryRead.ahk      (Automated MPRESS extraction via ReadProcessMemory API)
-│   │   ├── Install-ContextMenu.ahk       (Installs right-click menu)
-│   │   ├── Launch-MyAutToExe.ahk         (Optional download of mATE for old AHK decompilation)
+│   │   ├── Launch-MyAutToExe.ahk         (Downloads mATE for very old AHK decompilation)
 │   │   ├── Notifications.ahk             (Notification library)
 │   │   ├── PE-Analysis.ahk               (PE analysis, packer detection, RCData extraction)
 │   │   ├── Script-Utils.ahk              (Shared script utilities - SaveExtractedScript)
-│   │   ├── Uninstall-ContextMenu.ahk     (Uninstalls right-click menu)
 │   │   └── Unpack-Exe.ahk                (Downloads UPX unpacker for packed executables)
 │   ├── log\                              (Decompilation logs - git-ignored)
 │   ├── res\                              (Development resources - synced to GitHub)
+│   │   ├── AH.ico                        (AHK-Hacker icon - used for compilation)
 │   │   ├── compile_and_sign.ps1          (Build script for development)
 │   │   ├── icon.png                      (Project icon for README)
-│   │   ├── AH.ico                        (AHK-Hacker icon - used for compilation)
 │   │   └── sign_exe.ps1                  (Code signing script)
-│   ├── AHK-Hacker.ahk                    (Main decompiler script)
-│   ├── AHK-Hacker.exe                    (Compiled and signed executable)
-│   ├── Install.ahk                       (Installer - unblocks files etc...)
-│   └── Uninstall.ahk                     (Uninstaller - removes context menu etc...)
+│   ├── AHK-Hacker.ahk                    (Main decompiler script - source reference only)
+│   ├── AHK-Hacker.exe                    (Compiled and signed executable - run this!)
+│   └── Uninstall AHK-Hacker.lnk          (Uninstall shortcut - created on first run)
 ├── .gitattributes                        (Git line ending configuration)
 ├── .gitignore                            (Git ignore patterns)
 ├── CLAUDE.md                             (This file - developer documentation)
@@ -55,8 +52,21 @@ AHK-Hacker\
 ## Key Components
 
 ### AHK-Hacker.ahk
-Main decompiler that:
-1. Receives .exe path from context menu argument
+Main decompiler with integrated context menu installation. Supports command-line parameters:
+- `AHK-Hacker.exe <file.exe>` - Decompile file (prompts to install context menu if missing)
+- `AHK-Hacker.exe /uninstall` - Remove context menu integration (shows confirmation)
+- `AHK-Hacker.exe /uninstall /silent` - Remove context menu silently (no prompts)
+- Drag-and-drop .exe files onto AHK-Hacker.exe (works without AutoHotkey)
+
+**First-Run Auto-Install:**
+- Checks if context menu is installed on every run (registry key check)
+- If missing: Shows OK/Cancel dialog asking to install
+- OK: Installs context menu + creates uninstall shortcut + continues with decompilation
+- Cancel: Continues with decompilation without installing (prompts again next time)
+- If context menu already exists: Skips prompt and continues directly
+
+**Decompilation workflow:**
+1. Receives .exe path from context menu argument or drag-and-drop
 2. Analyzes PE file for packer detection (UPX/MPRESS) via lib/PE-Analysis.ahk
 3. Validates AHK signature via manifest (RT_MANIFEST)
 4. If MPRESS → automatically extracts via ReadProcessMemory API (lib/Automated-MemoryRead.ahk)
@@ -68,19 +78,12 @@ Main decompiler that:
 10. Outputs `filename_decompiled.ahk` in same folder as source
 11. Cleans up temporary unpacked files (`*.unpacked.*.tmp`)
 
-### Install.ahk
-Installation script that:
-1. Shows OK/Cancel dialog before starting installation
-2. Unblocks all files recursively using PowerShell
-3. Runs lib/Install-ContextMenu.ahk to register context menu
-4. Shows progress notifications via ShowProgress from lib/Notifications.ahk
-
-### Uninstall.ahk
-Uninstallation script that:
-1. Shows OK/Cancel dialog before starting uninstallation
-2. Runs lib/Uninstall-ContextMenu.ahk in silent mode to remove context menu
-3. Cleans up downloaded files from bin/ (upx.exe, mATE/)
-4. Shows progress notifications via ShowProgress from lib/Notifications.ahk
+**Built-in Functions:**
+- `IsContextMenuInstalled()` - Checks if context menu registry key exists
+- `PromptInstallContextMenu()` - Shows OK/Cancel dialog for installation
+- `InstallContextMenu(exePath)` - Writes registry keys for context menu
+- `CreateUninstallShortcut(targetExePath, lnkDir)` - Creates uninstall shortcut via COM
+- `PerformUninstall()` - Removes registry keys and uninstall shortcut
 
 ### lib/PE-Analysis.ahk
 PE analysis and direct RCData extraction library that:
@@ -96,20 +99,6 @@ PE analysis and direct RCData extraction library that:
 - `DetectAutoHotkeyViaManifest(filePath)` - Manifest-based AHK validation
 - `ExtractAHKScriptFromRCData(exePath, outputDir)` - Direct RCData extraction
 - `IsUPXPacked(exePath, logFile)` - UPX detection via section parsing
-
-### lib/Install-ContextMenu.ahk
-Registry script that adds context menu entry at:
-```
-HKEY_CURRENT_USER\Software\Classes\exefile\shell\AHK-Hacker
-```
-No admin rights required.
-Supports `/silent` parameter to run without message boxes (uses ShowProgress notifications instead).
-Looks for AHK-Hacker.exe in parent directory (since script is in lib/ folder).
-
-### lib/Uninstall-ContextMenu.ahk
-Registry script that removes context menu entry.
-No admin rights required.
-Supports `/silent` parameter to run without message boxes (uses ShowProgress notifications instead).
 
 ### lib/Unpack-Exe.ahk
 Unpacker library that automatically handles UPX-compressed executables:
@@ -275,7 +264,9 @@ AHK-Hacker uses comprehensive PE header analysis to detect packers and validate 
 5. Clean files → direct RCData extraction
 
 ### Building
-`AHK-Hacker.exe` is pre-compiled and digitally signed. The source `AHK-Hacker.ahk` is included for reference.
+`AHK-Hacker.exe` is pre-compiled and digitally signed. The source `AHK-Hacker.ahk` is included as reference only.
+
+**No AutoHotkey installation required!** The compiled `AHK-Hacker.exe` is self-contained and runs standalone.
 
 **Build Process:**
 Version upgrades, compilation, and code signing are handled manually by the maintainer using the scripts in `src/res/`:
@@ -284,15 +275,16 @@ Version upgrades, compilation, and code signing are handled manually by the main
 - `sign_exe.ps1` applies digital signature to the compiled executable
 
 ### Testing
-1. Run `Install.ahk` (prompts OK/Cancel, then installs context menu)
-   - Or run `lib/Install-ContextMenu.ahk` manually to register context menu
-2. Right-click any AHK-compiled .exe and select "AHK-Hacker - Decompile"
+1. Run `AHK-Hacker.exe` directly (or drag an .exe file onto it)
+2. First run: Click OK on the installation prompt to add context menu integration
+3. Right-click any AHK-compiled .exe and select "AHK-Hacker - Decompile"
+4. To uninstall: Double-click "Uninstall AHK-Hacker.lnk" or run `AHK-Hacker.exe /uninstall`
 
 ## Common Issues
 
 - **"Failed to extract script data"**: The .exe is not an AHK executable, uses encryption, or is very old (try mATE)
 - **"This is not an AutoHotkey compiled executable"**: Manifest check failed - file is not AHK-compiled
-- **Context menu missing**: Run `lib/Install-ContextMenu.ahk`, restart Explorer if needed
+- **Context menu missing**: Run `AHK-Hacker.exe` again and click OK on the installation prompt, or restart Windows Explorer if recently installed
 
 ## Development Resources (src/res/ folder)
 
