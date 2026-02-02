@@ -102,7 +102,7 @@ AHK-Hacker\
 
 ### Using Uninstall Shortcut
 
-1. **Double-click `Uninstall AHK-Hacker.lnk`** (created during installation)
+1. **Double-click `Uninstall AHK-Hacker.lnk`** (created on first run)
 2. Click **OK** on the uninstallation prompt (or Cancel to abort)
 
 This will automatically:
@@ -179,6 +179,7 @@ Works with compiled scripts from:
 - **AutoHotkey** - Powerful. Easy to learn: [The ultimate automation scripting language for Windows.](https://www.autohotkey.com/)
 - **UPX** - [the Ultimate Packer for eXecutables](https://upx.github.io/)
 - **myAutToExe (mATE)** - [AutoIt Decompiler](https://github.com/daovantrong/myAutToExe)
+
 
 
 
