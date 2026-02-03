@@ -216,7 +216,7 @@ DownloadMyAutToExe() {
     ShowProgress("Downloading myAutToExe decompiler...", 1, "AHK-Hacker")
 
     binPath := A_ScriptDir . "\bin\mATE"
-    downloadUrl := "https://github.com/KnifMelti/SandboxStart/raw/master/Source/assets/mATE.zip"
+    downloadUrl := "https://github.com/KnifMelti/AHK-Hacker/raw/main/src/res/mATE.zip"
 
     try {
         ; Download ZIP file to temp location

@@ -38,6 +38,7 @@ AHK-Hacker\
 │   │   ├── AH.ico                        (AHK-Hacker icon - used for compilation)
 │   │   ├── compile_and_sign.ps1          (Build script for development)
 │   │   ├── icon.png                      (Project icon for README)
+│   │   ├── mATE.zip                      (AutoIt Decompiler)
 │   │   └── sign_exe.ps1                  (Code signing script)
 │   ├── AHK-Hacker.ahk                    (Main decompiler script - source reference only)
 │   ├── AHK-Hacker.exe                    (Compiled and signed executable - run this!)
@@ -205,7 +206,7 @@ Automatic decompilation fallback for very old AutoHotkey executables (v1.0.48.5 
 - **OfferMyAutToExe(exePath)** - Shows dialog offering to try myAutToExe decompilation
 - **EnsureMyAutToExeInstalled()** - Checks if myAutToExe is installed to bin folder, downloads if needed
 - **DownloadMyAutToExe()** - Downloads and extracts mATE from GitHub to bin\mATE\
-- Downloads ZIP from GitHub (KnifMelti/SandboxStart repository)
+- Downloads ZIP from GitHub (KnifMelti/AHK-Hacker repository)
 - Extracts mATE folder to bin\mATE\
 - Unblocks all files recursively
 - Runs myAutToExe.exe GUI
